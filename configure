@@ -1,0 +1,185 @@
+#!/bin/sh
+
+usage() {
+cat <<EOF
+Usage: $0 [OPTION]... [VAR=VALUE]
+
+To assign environment variables (e.g., CC, CFLAGS...), specify them as
+VAR=VALUE.  See below for descriptions of some of the useful variables.
+
+Defaults for the options are specified in brackets.
+
+Configuration:
+    -h, --help              display this help and exit
+    --srcdir=DIR            source directory [detected]
+
+Installation directories:
+    --prefix=DIR            main installation prefix [/usr/local]
+    --exec-prefix=DIR       installation prefix for executable files [prefix]
+
+Fine tuning of the installation directories:
+    --bindir=DIR            user executables [exec-prefix/bin]
+    --datadir=DIR           read-only arch-independent data [datarootdir]
+    --datarootdir=DIR       read-only arch-independent data root [prefix/share]
+    --docdir=DIR            documentation root [datarootdir/doc/riot]
+    --dvidir=DIR            dvi documentation [docdir]
+    --htmldir=DIR           html documentation [docdir]
+    --includedir=DIR        C header files [prefix/include]
+    --infodir=DIR           info documentation [datarootdir/info]
+    --libdir=DIR            object code libraries [exec-prefix/lib]
+    --libexecdir=DIR        program executables [exec-prefix/libexec]
+    --localedir=DIR         locale-dependent data [datarootdir/locale]
+    --localstatedir=DIR     modifiable single-machine data [prefix/var]
+    --mandir=DIR            man documentation [datarootdir/man]
+    --pdfdir=DIR            pdf documentation [docdir]
+    --psdir=DIR             ps documentation [docdir]
+    --sbindir=DIR           system admin executables [exec-prefix/sbin]
+    --sharedstatedir=DIR    modifiable architecture-independent data [prefix/com]
+    --sysconfdir=DIR        read-only single-machine data [prefix/etc]
+
+Riot build environment configuration:
+    --pkgbindir=DIR             user executables [exec-prefix/bin]
+    --pkgdatadir=DIR            read-only arch-independent data [datarootdir]
+    --pkgdatarootdir=DIR        read-only arch-independent data root [prefix/share]
+    --pkgdocdir=DIR             documentation root [datarootdir/doc]
+    --pkgdvidir=DIR             dvi documentation [docdir]
+    --pkghtmldir=DIR            html documentation [docdir]
+    --pkgincludedir=DIR         C header files [prefix/include]
+    --pkginfodir=DIR            info documentation [datarootdir/info]
+    --pkglibdir=DIR             object code libraries [exec-prefix/lib]
+    --pkglibexecdir=DIR         program executables [exec-prefix/libexec]
+    --pkglocaledir=DIR          locale-dependent data [datarootdir/locale]
+    --pkglocalstatedir=DIR      modifiable single-machine data [prefix/var]
+    --pkgmandir=DIR             man documentation [datarootdir/man]
+    --pkgpdfdir=DIR             pdf documentation [docdir]
+    --pkgpsdir=DIR              ps documentation [docdir]
+    --pkgsbindir=DIR            system admin executables [exec-prefix/sbin]
+    --pkgsharedstatedir=DIR     modifiable architecture-independent data [prefix/com]
+    --pkgsysconfdir=DIR         read-only single-machine data [prefix/etc]
+
+    --target=TARGET             Passed to package ./configure scripts by default [${CTARGET-${CHOST-unknown}}]
+    --host=HOST                 Passed to package ./configure scripts by default [${CHOST-unknown}]
+    --build=BUILD               Passed to package ./configure scripts by default [${CBUILD-${CHOST-unknown}}]
+
+These configuration variables are used for the build environment Riot creates
+when building packages.
+
+Some influential environment variables:
+    AR              Static library archiver command [detected]
+    AS              Assembler command [detected]
+    CC              C compiler command [detected]
+    CPP             C pre-processor [detected]
+    CXX             C++ compiler command [detected]
+    LD              Linker command [detected]
+    NM              Symbol list command [detected]
+    OBJCOPY         Object copying command [detected]
+    OBJDUMP         Object dumping command [detected]
+    PKG_CONFIG      pkg-config command [detected]
+    RANLIB          Static library indexer command [detected]
+
+Any variable which is manually stated on the configure arguments will be passed
+down into Riot build environments and exported.
+
+EOF
+exit 0
+}
+
+fail() { printf '%s\n' "$*"; exit 1; }
+
+cmdline="$0 $@"
+
+variables="
+    target:CTARGET host:CHOST build:CBUILD srcdir
+"
+
+for v in bindir datadir datarootdir docdir dvidir exec-prefix htmldir \
+    includedir infodir libdir libexecdir localedir localstatedir mandir pdfdir \
+    prefix psdir sbindir sharedstatedir sysconfdir;do
+    variables="$variables $v pkg$v"
+done
+
+
+while [ $# -ne 0 ];do
+    case "${1}" in
+        -h|--help) usage ;;
+        --*)
+            for v in ${variables};do
+                v="${v%%:*}"
+                v_clean=$(printf %s "${v}" | tr '-' '_')
+                eval "
+                    case \"${1}\" in
+                        --${v})     shift; ${v_clean}=\"\${1}\"; break ;;
+                        --${v}=)    ${v_clean}=\"\"; break ;;
+                        --${v}=*)   ${v_clean}=\"\${1#*=}\"; break ;;
+                        --*)         : ;;
+                        *)          printf '%s: WARNING: unrecognized options: %s\n' "${0}" "${1}" >&2; break ;;
+                    esac
+                "
+            done
+        ;;
+        *=*) eval "${1%%=*}=${1#*=}"; manual_variables="${manual_variables} ${1%%=*}" ;;
+        *) printf '%s: WARNING: unrecognized options: %s\n' "${0##*/}" "${1}" >&2 ;;
+    esac
+    shift
+done
+
+srcdir=${srcdir-${0%/configure}}
+prefix=${prefix-/usr/local}
+exec_prefix=${exec_prefix-$prefix}
+bindir=${bindir-$exec_prefix/bin}
+sbindir=${sbindir-$exec_prefix/sbin}
+libexecdir=${libexecdir-$exec_prefix/libexec}
+sysconfdir=${sysconfdir-$prefix/etc}
+sharedstatedir=${sharedstatedir-$prefix/com}
+localstatedir=${localstatedir-$prefix/var}
+libdir=${libdir-$exec_prefix/lib}
+includedir=${includedir-$prefix/include}
+datarootdir=${datarootdir-$prefix/share}
+datadir=${datadir-$datarootdir}
+infodir=${infodir-$datarootdir/info}
+localedir=${localedir-$datarootdir/locale}
+mandir=${mandir-$datarootdir/man}
+docdir=${docdir-$datarootdir/doc/riot}
+htmldir=${htmldir-$docdir}
+dvidir=${dvidir-$docdir}
+pdfdir=${pdfdir-$docdir}
+psdir=${psdir-$docdir}
+host=${host-$CHOST}
+target=${target-${CTARGET-$CHOST}}
+build=${build-${CBUILD-$CHOST}}
+
+for v in ${variables};do
+    case "${v}" in
+        pkg*)
+            v=$(printf '%s' "${v}" | tr '-' '_')
+            eval "pkg${v#pkg}=\${${v}-\$${v#pkg}}"
+        ;;
+    esac
+done
+
+cat >config.mak <<EOF
+# This version of config.mak was generated by:
+# $cmdline
+# Any changes made here will be lost if configure is re-run
+$(for v in ${variables};do
+    v=$(printf %s "${v}" | tr '-' '_')
+    printf '%s = %s\n' "${v#*:}" $(eval "printf %s \"\$${v%%:*}\"")
+done)
+EOF
+
+mkdir -p "lib"
+
+cat >lib/env.sh.in.tmp <<EOF
+# This version of env.sh was generated by:
+# $cmdline
+#
+$(cat "${srcdir}"/lib/env.sh.in)
+$(for v in ${manual_variables};do
+    printf 'export %s="%s"\n' "${v}" $(eval "printf %s \"\$${v}\"")
+done)
+$(cat lib/env.sh.in 2>/dev/null)
+EOF
+mv -f lib/env.sh.in.tmp lib/env.sh.in
+test "$srcdir" = "." || ln -sf $srcdir/Makefile .
+
+printf "done\n"

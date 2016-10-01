@@ -1,0 +1,4 @@
+*.sh
+config.mak
+!test/*.sh
+test/*.output

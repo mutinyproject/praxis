@@ -1,0 +1,94 @@
+#!/bin/mksh
+#
+# Riot, a from-source package manager for Mutiny Linux.
+#
+# Copyright (c) 2016 Kylie McClain <kylie@somasis.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+stderr() {
+    # shellcheck disable=SC2059
+    printf "$@" >&2
+}
+
+debug() {
+    if [ -n "$1" ];then
+        "${riot_debug}" && stderr "riot: $@"
+    else
+        "${riot_debug}"; return $?
+    fi
+}
+
+edo() {
+    # shellcheck disable=SC2059
+    raction "$@"
+    if "${riot_quiet}";then
+        "$@" >/dev/null 2>&1
+    else
+        "$@"
+    fi
+}
+
+edebug() {
+    if [ "${riot_debug}" = 'true' ];then
+        edo "${@}"
+    else
+        "${@}"
+    fi
+}
+
+raction() {
+    stderr "${color_bold}${color_green}+${color_reset} %s\n" "$*"
+}
+
+rnote() {
+    stderr "${color_bold}${color_yellow}===${color_reset} $@\n"
+}
+
+rinfo() {
+    stderr "${color_bold}${color_blue}===${color_reset} $@\n"
+}
+
+rsuccess() {
+    stderr "${color_bold}${color_green}===${color_reset} $@\n"
+}
+
+riot_color_init() {
+    case "${1}" in
+        auto)
+            if [ -t 1 ];then
+                riot_color="true"
+            else
+                riot_color="false"
+            fi
+        ;;
+        always) riot_color='true' ;;
+        never) riot_color='false' ;;
+        *)
+            riot_invalid "-c: ${1}" "parameter; auto, always, or never"
+        ;;
+    esac
+    if [ "${riot_color}" = true ];then
+        export color_reset='\e[0m'
+        export color_bold='\e[1m'
+        export color_black='\e[30m'
+        export color_red='\e[31m'
+        export color_green='\e[32m'
+        export color_yellow='\e[33m'
+        export color_blue='\e[34m'
+        export color_purple='\e[35m'
+        export color_cyan='\e[36m'
+        export color_white='\e[37m'
+    fi
+}
+
