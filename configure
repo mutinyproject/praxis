@@ -38,28 +38,15 @@ Fine tuning of the installation directories:
     --sysconfdir=DIR        read-only single-machine data [prefix/etc]
 
 Riot build environment configuration:
-    --pkgbindir=DIR             user executables [exec-prefix/bin]
-    --pkgdatadir=DIR            read-only arch-independent data [datarootdir]
-    --pkgdatarootdir=DIR        read-only arch-independent data root [prefix/share]
-    --pkgdocdir=DIR             documentation root [datarootdir/doc]
-    --pkgdvidir=DIR             dvi documentation [docdir]
-    --pkghtmldir=DIR            html documentation [docdir]
-    --pkgincludedir=DIR         C header files [prefix/include]
-    --pkginfodir=DIR            info documentation [datarootdir/info]
-    --pkglibdir=DIR             object code libraries [exec-prefix/lib]
-    --pkglibexecdir=DIR         program executables [exec-prefix/libexec]
-    --pkglocaledir=DIR          locale-dependent data [datarootdir/locale]
-    --pkglocalstatedir=DIR      modifiable single-machine data [prefix/var]
-    --pkgmandir=DIR             man documentation [datarootdir/man]
-    --pkgpdfdir=DIR             pdf documentation [docdir]
-    --pkgpsdir=DIR              ps documentation [docdir]
-    --pkgsbindir=DIR            system admin executables [exec-prefix/sbin]
-    --pkgsharedstatedir=DIR     modifiable architecture-independent data [prefix/com]
-    --pkgsysconfdir=DIR         read-only single-machine data [prefix/etc]
+    --defaultpath=PATH      default PATH used in build environment [bindir:sbindir]
+    --builddir=DIR          directory used for building packages in [localstatedir/tmp/riot]
+    --cachedir=DIR          directory for caching downloaded files [localstatedir/cache/riot]
+    --installdir=DIR        directory for keeping information about installed packages [localstatedir/db/riot/installed]
+    --repodir=DIR           directory where package repositories will be kept [localstatedir/db/riot/packages]
 
-    --target=TARGET             Passed to package ./configure scripts by default [${CTARGET-${CHOST-unknown}}]
-    --host=HOST                 Passed to package ./configure scripts by default [${CHOST-unknown}]
-    --build=BUILD               Passed to package ./configure scripts by default [${CBUILD-${CHOST-unknown}}]
+    --target=TARGET         passed to package ./configure scripts by default [${CTARGET-${CHOST-unknown}}]
+    --host=HOST             passed to package ./configure scripts by default [${CHOST-unknown}]
+    --build=BUILD           passed to package ./configure scripts by default [${CBUILD-${CHOST-unknown}}]
 
 These configuration variables are used for the build environment Riot creates
 when building packages.
@@ -84,20 +71,21 @@ EOF
 exit 0
 }
 
+quote() {
+    printf '%s' "$1" | sed -e "s/'/'\\\\''/g" -e "1s/^/'/" -e "\$s/\$/'/"
+}
+
 fail() { printf '%s\n' "$*"; exit 1; }
 
 cmdline="$0 $@"
 
 variables="
-    target:CTARGET host:CHOST build:CBUILD srcdir
+    target host build srcdir
+    defaultpath
+    builddir cachedir repodir installdir
+    bindir datadir datarootdir docdir exec-prefix libdir libexecdir
+    localstatedir mandir prefix sbindir sysconfdir
 "
-
-for v in bindir datadir datarootdir docdir dvidir exec-prefix htmldir \
-    includedir infodir libdir libexecdir localedir localstatedir mandir pdfdir \
-    prefix psdir sbindir sharedstatedir sysconfdir;do
-    variables="$variables $v pkg$v"
-done
-
 
 while [ $# -ne 0 ];do
     case "${1}" in
@@ -108,16 +96,16 @@ while [ $# -ne 0 ];do
                 v_clean=$(printf %s "${v}" | tr '-' '_')
                 eval "
                     case \"${1}\" in
-                        --${v})     shift; ${v_clean}=\"\${1}\"; break ;;
-                        --${v}=)    ${v_clean}=\"\"; break ;;
-                        --${v}=*)   ${v_clean}=\"\${1#*=}\"; break ;;
+                        --${v})     shift; ${v_clean}=\"\${1}\"; break >/dev/null 2>&1 ;;
+                        --${v}=)    ${v_clean}=\"\"; break >/dev/null 2>&1 ;;
+                        --${v}=*)   ${v_clean}=\"\${1#*=}\"; break >/dev/null 2>&1 ;;
                         --*)         : ;;
-                        *)          printf '%s: WARNING: unrecognized options: %s\n' "${0}" "${1}" >&2; break ;;
+                        *)          printf '%s: WARNING: unrecognized options: %s\n' "${0}" "${1}" >&2; break >/dev/null 2>&1 ;;
                     esac
                 "
             done
         ;;
-        *=*) eval "${1%%=*}=${1#*=}"; manual_variables="${manual_variables} ${1%%=*}" ;;
+        *=*) eval "${1%%=*}=$(quote "${1#*=}")"; manual_variables="${manual_variables} ${1%%=*}" ;;
         *) printf '%s: WARNING: unrecognized options: %s\n' "${0##*/}" "${1}" >&2 ;;
     esac
     shift
@@ -145,16 +133,18 @@ dvidir=${dvidir-$docdir}
 pdfdir=${pdfdir-$docdir}
 psdir=${psdir-$docdir}
 host=${host-$CHOST}
-target=${target-${CTARGET-$CHOST}}
-build=${build-${CBUILD-$CHOST}}
+target=${target-${host-${CTARGET-$CHOST}}}
+build=${build-${host-${CBUILD-$CHOST}}}
 
-for v in ${variables};do
-    case "${v}" in
-        pkg*)
-            v=$(printf '%s' "${v}" | tr '-' '_')
-            eval "pkg${v#pkg}=\${${v}-\$${v#pkg}}"
-        ;;
-    esac
+builddir=${builddir-${localstatedir}/tmp/riot}
+cachedir=${cachedir-${localstatedir}/cache/riot}
+repodir=${repodir-${localstatedir}/db/riot/repositories}
+installdir=${installdir-${localstatedir}/db/riot/installed}
+defaultpath=${defaultpath-$bindir:$sbindir}
+
+for v in ${variables} ${manual_variables};do
+    v=$(printf %s "${v}" | tr '-' '_')
+    printf '%s = %s\n' "${v#*:}" $(eval "printf %s \"\$${v%%:*}\"")
 done
 
 cat >config.mak <<EOF
@@ -165,21 +155,48 @@ $(for v in ${variables};do
     v=$(printf %s "${v}" | tr '-' '_')
     printf '%s = %s\n' "${v#*:}" $(eval "printf %s \"\$${v%%:*}\"")
 done)
+
+
+bin/%.sh: \$(srcdir)/bin/%.sh.in
+	cp "\$(srcdir)/$<" "\$@"
+	sed 's|@version@|\$(version)|g' -i "\$@"
+$(for v in ${variables};do
+    v=$(printf %s "${v%%:*}" | tr '-' '_')
+    printf "\tsed 's|@%s@|\$(%s)|g' -i \"\$@\"\n" "${v}" "${v}"
+done)
+	chmod +x "\$@"
+lib/%.sh: \$(srcdir)/lib/%.sh.in
+	[ \$< = env.sh.in ] || cp "\$(srcdir)/$<" "\$@"
+	sed 's|@version@|\$(version)|g' -i "\$@"
+$(for v in ${variables};do
+    v=$(printf %s "${v%%:*}" | tr '-' '_')
+    printf "\tsed 's|@%s@|\$(%s)|g' -i \"\$@\"\n" "${v}" "${v}"
+done)
 EOF
 
-mkdir -p "lib"
+mkdir -p lib
 
-cat >lib/env.sh.in.tmp <<EOF
+cat >lib/env.sh.in <<EOF
 # This version of env.sh was generated by:
 # $cmdline
-#
-$(cat "${srcdir}"/lib/env.sh.in)
+
+ALLOWED_VARIABLES=( )
+
+# Content from distributed env.sh.in.in
+$(cat "${srcdir}"/lib/env.sh.in.in)
+
+# Content from configuration variables
 $(for v in ${manual_variables};do
     printf 'export %s="%s"\n' "${v}" $(eval "printf %s \"\$${v}\"")
+    printf 'ALLOWED_VARIABLES+=( "%s" )\n' "${v}"
 done)
-$(cat lib/env.sh.in 2>/dev/null)
+
+$(if [ -f lib/env.distro.sh.in ];then
+    printf '# %s\n' "Content from env.distro.sh.in"
+    cat lib/env.distro.sh.in 2>/dev/null
+fi)
+
 EOF
-mv -f lib/env.sh.in.tmp lib/env.sh.in
 test "$srcdir" = "." || ln -sf $srcdir/Makefile .
 
 printf "done\n"

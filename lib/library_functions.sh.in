@@ -1,0 +1,47 @@
+#!/bin/mksh
+#
+# Riot, a from-source package manager for Mutiny Linux.
+#
+# Copyright (c) 2016 Kylie McClain <kylie@somasis.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+import() {
+    local parents possible_locations LIBRARIES found
+    for arg in "$@";do
+        local LIBRARY="${arg}"
+        deps="${REPODIR}"/"${REPOSITORY}"/metadata/dependencies
+        if [ -r "${deps}" ] && [ -r "${deps}" -a -z $(<"${REPODIR}"/"${REPOSITORY}"/metadata/dependencies) ];then
+            parents=( $(<"${REPODIR}"/"${REPOSITORY}"/metadata/dependencies) )
+            possible_locations=( "${REPOSITORY}" $(riot_sort_repositories "${parents[@]}") )
+        else
+            possible_locations=( "${REPOSITORY}" )
+        fi
+        for REPOSITORY in "${possible_locations[@]}";do
+            if [ -e "${REPODIR}"/"${REPOSITORY}"/libraries/"${LIBRARY}".lib ];then
+                local found=true
+                LIBRARIES+=( "${LIBRARY}" )
+                . "${REPODIR}"/"${REPOSITORY}"/libraries/"${LIBRARY}".lib
+            fi
+        done
+        [ -n "${found}" ] || die "import: Failed to find requested library \"${LIBRARY}\""
+    done
+}
+
+export_phases() {
+    local phase
+    for phase in "${@}";do
+        riot_map_phase "${phase}":"${LIBRARY}_${phase}"
+    done
+}
+

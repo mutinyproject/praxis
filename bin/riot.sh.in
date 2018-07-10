@@ -16,43 +16,23 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# shellcheck disable=SC1091
-. "@@libdir@@/riot/internal_functions.sh"
-# shellcheck disable=SC1091
-. "@@libdir@@/riot/default_functions.sh"
+. "@libdir@/riot/internal_functions.sh"
 
-export PATH="${PATH}:@@libexecdir@@/riot"
+ALLOWED_VARIABLES+=( JOBS PHASE )
 
-export pkgprefix="@@pkgprefix@@"
-export pkgexec_prefix="@@pkgexec_prefix@@"
-export pkgbindir="@@pkgbindir@@"
-export pkgsbindir="@@pkgsbindir@@"
-export pkglibdir="@@pkglibdir@@"
-export pkglibexecdir="@@pkglibexecdir@@"
-export pkgdatarootdir="@@pkgdatarootdir@@"
-export pkgdatadir="@@pkgdatadir@@"
-export pkgdocdir="@@pkgdocdir@@"
-export pkginfodir="@@pkginfodir@@"
-export pkgmandir="@@pkgmandir@@"
-export pkgsysconfdir="@@pkgsysconfdir@@"
-export CHOST="@@CHOST@@"
-export CBUILD="@@CBUILD@@"
-export CTARGET="@@CTARGET@@"
+riot_install_phases="pkg_init src_fetch src_unpack src_prepare src_configure src_compile src_test src_install pkg_premerge pkg_merge pkg_postmerge"
+riot_uninstall_phases="pkg_init pkg_premerge pkg_unmerge pkg_postmerge"
 
-export BUILDDIR="@@BUILDDIR@@"
-export CACHEDIR="@@CACHEDIR@@"
-export INSTALLDBDIR="@@INSTALLDBDIR@@"
-export PKGDIR="@@PKGDIR@@"
-export PHASE=
-export riot_phases="pkg_fetch pkg_unpack pkg_prepare pkg_configure pkg_compile pkg_check pkg_install pkg_premerge pkg_merge pkg_postmerge"
-export riot_install_phases="${riot_phases}"
-export riot_debug=false
-export riot_verbose=false
-export riot_quiet=false
-export JOBS=$(riot_jobs)
+riot_debug=false
+riot_verbose=false
+riot_quiet=false
+JOBS=$(riot_jobs)
+PHASE=
+
+cd /
 
 riot_version() {
-    printf 'riot %s\n' "@@VERSION@@"
+    printf 'Riot %s\n' "@version@"
 }
 
 riot_help() {
@@ -60,8 +40,8 @@ riot_help() {
     printf '%s: %s\n'   \
         "default build directory"       "${BUILDDIR}"      \
         "default cache directory"       "${CACHEDIR}"      \
-        "default installdb directory"   "${INSTALLDBDIR}"  \
-        "default package directory"     "${PKGDIR}"
+        "default install directory"     "${INSTALLDIR}"    \
+        "default package directory"     "${REPODIR}"
 }
 
 riot_invalid() {
@@ -79,7 +59,7 @@ while getopts :c:j:dqv opt;do
         j)
             case "${OPTARG}" in
                 [0-9]*)
-                    export JOBS="${OPTARG}"
+                    JOBS="${OPTARG}"
                 ;;
                 *)
                     riot_invalid "-j: ${OPTARG}" "number"
@@ -87,13 +67,13 @@ while getopts :c:j:dqv opt;do
             esac
         ;;
         v)
-            export riot_verbose=true
+            riot_verbose=true
         ;;
         d)
-            export riot_debug=true
+            riot_debug=true
         ;;
         q)
-            export riot_quiet=true
+            riot_quiet=true
         ;;
     esac
 done
@@ -105,12 +85,25 @@ riot_initialize
 case "${1:-help}" in
     add|install)
         shift
-        # shellcheck disable=SC2068
-        riot_pkg_install "$@"
+        riot_mode=install
+        riot_mode_install "$@"
+    ;;
+    remove|uninstall)
+        shift
+        riot_mode=uninstall
+        riot_mode_uninstall "$@"
     ;;
     info)
         shift
-        riot_pkg_info "$@"
+        riot_mode_info "$@"
+    ;;
+    files)
+        shift
+        riot_mode_files "$@"
+    ;;
+    disambiguate)
+        shift
+        riot_mode_disambiguate "$@"
     ;;
     version)
         riot_version

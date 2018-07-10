@@ -1,3 +1,0 @@
-#!/bin/mksh
-
-echo true

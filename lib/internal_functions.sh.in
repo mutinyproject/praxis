@@ -1,4 +1,4 @@
-#!/bin/mksh
+#!/bin/sh
 #
 # Riot, a from-source package manager for Mutiny Linux.
 #
@@ -16,41 +16,76 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+ALLOWED_VARIABLES=(
+    JOBS PHASE
+    HOME TMPDIR BUILD IMAGE WORK
+    PS4
+)
+
+. "@libdir@/riot/env.sh"
+. "@libdir@/riot/default_functions.sh"
 . "@libdir@/riot/display_functions.sh"
 . "@libdir@/riot/extract_functions.sh"
+. "@libdir@/riot/library_functions.sh"
 . "@libdir@/riot/version_functions.sh"
 
 die() {
-    # shellcheck disable=SC2059
-    stderr "$@"
+    rerror "Dying; $*"
     exit 1
+}
+
+riot_func_die() {
+    local caller="${1}" reason="${2}"; shift 2
+    case "${reason}" in
+        numarg)
+            local required="${1}" received="${2}"; shift 2
+            die "${caller}: needs ${required} argument(s) but received ${received}"
+        ;;
+        unset)
+            local var="${1}"; shift
+            die "${caller}: \$${var} should be set, but it's not..."
+        ;;
+        *)
+            die "riot_func_die: ${reason} isn't a known reason to die"
+        ;;
+    esac
 }
 
 get_var() {
     eval "printf '%s' \"\$$1\""
 }
 
-array_contains() {
+quote() {
+    printf %s\\n "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/" 
+}
+
+contains() {
     local item contains="${1}"; shift
     for item in "${@}";do
-        case "${item}" in
-            "${contains}")
-                return 0
-            ;;
-        esac
+        [ "${item}" = "${contains}" ] && return 0
+    done
+    return 1
+}
+
+contains_glob() {
+    local item contains="${1}"; shift
+    for item in "${@}";do
+        edebug eval "case \"${item}\" in ${contains}) return 0; ;; esac"
     done
     return 1
 }
 
 riot_recurse() {
+    local i test oldpwd
     case "${1}" in
         --test)
             local test="${2}"
             shift 2
         ;;
     esac
+
     test=${test:--e}
-    local oldpwd="${PWD}"
+    oldpwd="${PWD}"
     cd -P -- "$1"
     if [ "${#}" -eq 3 ];then
          [ "${PWD}" = "${3}" ] || return 1
@@ -63,25 +98,72 @@ riot_recurse() {
 }
 
 lsenv() {
-    # last cut removes any suffixes added for array variables
-    set | grep '^.*=.*' | cut -d'=' -f1 | cut -d'[' -f1
+    case "${1}" in
+        --global)
+            local v
+            for v in $(env | cut -d= -f1 | sort -ud);do
+                printf '%s\n' "${v}"
+            done
+        ;;
+        *)
+            set | sed -r '/^[a-zA-Z0-9_]*=/!d; s/(\[|=).*//' | sort -ud
+        ;;
+    esac
+}
+
+riot_print_sourced_pkg_metadata() {
+    local var val
+    for var in "${METADATA_VARIABLES[@]}";do
+        case "${var}" in
+            hidden:*) var=${var#hidden:} ;;
+        esac
+        var=${var%%:*} 
+        val=$(get_var "${var}")
+        val=$(quote "${val}")
+        printf '%s=%s\n' "${var}" "${val}"
+    done
+}
+
+riot_print_sourced_pkg_env() {
+    local var val
+    for var in $(lsenv --global);do # don't use lsenv because we only want exported/global
+        if ! contains "${var}" "${METADATA_VARIABLES[@]}";then
+            case "${var}" in
+                _|TERM|PHASE|BUILDDIR|CACHEDIR|HOME|INSTALLDIR|REPODIR|TMPDIR|REPOSITORIES) :; ;;
+                *)
+                    val=$(get_var "${var}")
+                    val=$(quote "${val}")
+                    printf '%s=%s\n' "${var}" "${val}"
+                ;;
+            esac
+        fi
+    done
+}
+
+riot_print_sourced_pkg_funcs() {
+    local func
+    for func in $(typeset -f | grep '()' | tr -d '() {}' | grep '^riot_run_phase_');do
+        typeset -f $(typeset -f "${func}" | sed '/riot_set_phase/!d s/.*riot_set_phase //')
+    done
 }
 
 riot_clear_env() {
     local var
     for var in $(lsenv);do
         case "${var}" in
-            color_*|riot_*|pkg*|ALLOWED_VARIABLES|METADATA_VARIABLES) ;;
+            riot_*|ALLOWED_VARIABLES|METADATA_VARIABLES) ;;
             *)
-                if ! array_contains "${var}" "${METADATA_VARAIBLES[@]}" "${ALLOWED_VARIABLES[@]}";then
+                if ! contains "${var}" "${ALLOWED_VARIABLES[@]}" "${METADATA_VARIABLES[@]}";then
                     # stderr redirection is used to quiet readonly variables
-                    edo unset -v "${var}" >/dev/null 2>&1
+                    unset -v "${var}" >/dev/null 2>&1
                 fi
             ;;
         esac
     done
 
-    . "@libdir@/riot/env.sh"
+    . "@libdir@"/riot/env.sh
+    [ -n "${REPOSITORY}" ] && [ -r "${REPODIR}/${REPOSITORY}/env.sh" ] && . "${REPODIR}/${REPOSITORY}/env.sh"
+    [ -r "@sysconfdir@"/riot/env.sh ] && . "@sysconfdir@"/riot/env.sh
 }
 
 type_is_function() { # XXX: on bash and mksh this catches builtins!
@@ -90,149 +172,326 @@ type_is_function() { # XXX: on bash and mksh this catches builtins!
     [ "${command}" = "$1" ]
 }
 
+riot_shell() {
+    if [ -n "${BASH}" ] && [ -n "${BASH_VERSION}" ];then
+        local type='bash'
+    elif [ -n "${KSH_VERSION}" ] && contains_glob '*"MIRBSD KSH"*' "${KSH_VERSION}";then
+        local type='mksh'
+    else
+        local type='unknown'
+    fi
+    local want="${1}"
+    if [ -n "${want}" ];then
+        [ "${type}" = "${want}" ] && return 0
+        return 1
+    else
+        printf "${type}"
+    fi
+}
+
 variable_is_array() {
-    if [ -n "${BASH_VERSION}" ];then
+    if riot_shell bash;then
         declare -a -p "${1}" >/dev/null 2>&1 && return 0
-    elif [ -n "${KSH_VERSION}" ];then
-        typeset | grep -Fxq "set -A ${1}" && return 0
+    elif riot_shell mksh;then
+        typeset | grep -Fxq -- "set -A ${1}" && return 0
     fi
     return 1
 }
 
 riot_set_phase() {
-    PHASE="$1"
-    export PHASE
+    export PHASE="${1}"
+    rinfo "Entering ${PHASE}"
 }
 
 riot_print_phase() {
     printf '%s' "${PHASE}"
 }
 
-# shellcheck disable=SC2120
-riot_set_phases() {
-    local prefix phase
-    prefix="$1"
-    for phase in ${riot_phases};do
-        if type_is_function "${phase}";then
-            # if the phase already is set, set the internal caller to simply
-            # set ${riot_phase} and then run the phase.
-            debug "Using custom phase for ${phase}\n"
-            eval "riot_run_${phase}() { riot_set_phase ${phase}; ${phase}; }"
-        elif [ -n "${prefix}" ] && type_is_function "${prefix}"_"${phase}";then
-            # if a prefix_phase exists, set the internal caller to set
-            # ${riot_phase}, and then run the prefix_phase
-            debug "Using \"${prefix}_\" prefixed phase for ${phase}\n"
-            eval "riot_run_${phase}() { riot_set_phase ${phase}; ${prefix}_${phase}; }"
-        else
-            # if there's no function to fallback to, the default phases are used.
-            debug "Using default phase for ${phase}\n"
-            eval "riot_run_${phase}() { riot_set_phase ${phase}; default; }"
-        fi
+riot_map_phase() {
+    local phase function
+    for phase in "${@}";do
+        function=${phase#*:}
+        phase=${phase%:*}
+        debug "Mapping ${phase} -> ${function}"
+        eval "riot_run_${phase}() { riot_set_phase ${phase}; ${function}; }"
+    done
+}
+
+riot_unmap_phase() {
+    local phase
+    for phase in "${@}";do
+        debug "Unmapping ${phase}"
+        unset riot_run_${phase}
     done
 }
 
 riot_initialize() {
+    REPOSITORIES=( $(riot_sort_repositories) ) # this should ALWAYS be sorted in order of importance (highest to lowest)
+    export REPOSITORIES
     riot_clear_env
-    riot_repositories="$(riot_sort_repositories)"
-    export riot_repositories
 
-    [ -d "${BUILDDIR}" ] || die "\"${BUILDDIR}\" (the configured builddir) does not exist.\n"
-    [ -d "${CACHEDIR}" ] || die "\"${CACHEDIR}\" (the configured cachedir) does not exist.\n"
-    [ -d "${PKGDIR}" ] || die "\"${PKGDIR}\" (the configured pkgdir) does not exist.\n"
+    [ -d "${BUILDDIR}" ] || die "\"${BUILDDIR}\" (the configured build directory) does not exist."
+    [ -d "${CACHEDIR}" ] || die "\"${CACHEDIR}\" (the configured cache directory) does not exist."
+    [ -d "${REPODIR}" ] || die "\"${REPODIR}\" (the configured repository directory) does not exist."
 }
 
 riot_check_repository() {
     local repository required_files file dir
-    repository="${1}"
-    "${riot_debug}" && debug "Checking \"${repository}\"...\n"
+    repository="${REPODIR}"/"${1}"
 
-    required_dirs="data packages"
-    required_files="data/importance"
-    for dir in ${required_dirs};do
-        [ -e "${repository}"/"${dir}" ] || die "\"${repository}\": \"${dir}/\" is missing.\n"
-        [ -d "${repository}"/"${dir}" ] || die "\"${repository}\": \"${dir}/\" is not readable.\n"
+    required_dirs=( metadata packages )
+    required_files=( metadata/dependencies metadata/importance )
+    for dir in "${required_dirs[@]}";do
+        [ -e "${repository}"/"${dir}" ] || die "\"${repository}\": \"${dir}/\" is missing."
+        [ -d "${repository}"/"${dir}" ] || die "\"${repository}\": \"${dir}/\" is not readable."
     done
-    for file in ${required_files};do
-        [ -e "${repository}"/"${file}" ] || die "\"${repository}\": \"${file}\" is missing.\n"
-        [ -r "${repository}"/"${file}" ] || die "\"${repository}\": \"${file}\" is not readable.\n"
+    for file in "${required_files[@]}";do
+        [ -e "${repository}"/"${file}" ] || die "\"${repository}\": \"${file}\" is missing."
+        [ -r "${repository}"/"${file}" ] || die "\"${repository}\": \"${file}\" is not readable."
     done
 
 }
 
 riot_sort_repositories() {
-    local repositories repository importance
+    local unsorted_repositories repositories repository importance
+    if [ -n "${1}" ];then
+        for repository in "${@}";do
+            unsorted_repositories+=( "${REPODIR}"/"${repository}"/ )
+        done
+    else
+        unsorted_repositories=( "${REPODIR}"/*/ )
+    fi
 
-    for repository in "${PKGDIR}"/*/;do
+    for repository in "${unsorted_repositories[@]}";do
         repository="${repository%/}" # remove trailing /
+        repository=${repository##*/}
         case "${repository}" in
             .*) continue ;; # skip "^\..*" directories, for example ".git"
-            *)  riot_check_repository "${repository}" || die "\"${repository}\" failed the sanity check.\n" ;;
+            *)  riot_check_repository "${repository}" || die "\"${repository}\" failed the sanity check." ;;
         esac
-        read -r importance < "${repository}"/data/importance
-        repositories="${repositories} ${importance}:${repository}"
+        read -r importance < "${REPODIR}"/"${repository}"/metadata/importance
+        repositories+=( "${importance}:${repository}" )
     done
 
-    # shellcheck disable=SC2086
-    printf '%s\n' ${repositories} | sort -n | cut -d':' -f2-
-}
-
-riot_locate_pkg() {
-    local repository package version result file candidates
-    package="${1}"
-    for repository in ${riot_repositories};do
-        if [ -d "${repository}"/packages/"${package}" ];then
-            for file in "${repository}"/packages/"${package}"/*;do
-                file=${file#${repository}/packages/${package}/}
-                case "${file}" in
-                    ${package}-*.riot)
-                        candidates="${file} "
-                    ;;
-                esac
-            done
-            if [ -n "${candidates}" ];then
-                candidate_num=$(printf '%s\n' ${candidates} | wc -l)
-                [ "${candidate_num}" -eq 1 ] && result=$(printf '%s' ${candidates})
-                [ "${candidate_num}" -gt 1 ] && result=$(printf '%s\n' ${candidates} | tail -n1)
-            fi
-        fi
-        [ -n "${result}" ] && result="${repository}"/packages/"${package}"/"${result}" && break # stop on first result; collisions are ignored.
-    done
-    [ -z "${result}" ] && return 1
-    printf '%s' "${result}"
+    printf '%s\n' "${repositories[@]}" | sort -n | cut -d':' -f2-
 }
 
 riot_source_pkg() {
-    local pkg file
-    pkg="${1}"
-    file=$(riot_locate_pkg "${pkg}") || die "Failed to locate \"${pkg}\".\n"
-    debug "Using \"%s\"\n" "${file}"
+    local riot_source_pkg_file=$( (riot_disambiguate_spec "${1}" && printf '%s\n' "${FILE}") ) || die "Error sourcing package."
+    . "${riot_source_pkg_file}"
+}
 
-    # variables which a package should always be able to see
-    PN="${file##*/}"
-    PN="${PN%-*}"
+# valid spec:
+# musl-libc#1.1.15:0::mutiny    = no disambiguation done
+# musl-libc:0                   = determine version and repository
+# musl-libc#1.1.15              = determine repository and slot
+# musl-libc::mutiny             = determine version and slot
+# musl-libc                     = determine version, slot, and repository
+riot_disambiguate_spec() {
+    local spec="${1}"
+    case "${spec}" in
+        *::installed)
+            local installed=true
+            local spec=${spec%::installed}
+        ;;
+    esac
+    case "${spec}" in
+        *#*:*::*) # musl-libc#1.1.15:0::mutiny; no disambiguation needed
+            REPOSITORY=${spec##*::}
+            spec=${spec%::*} # musl-libc#1.1.15:0
+            PN=${spec%%#*}
+            spec=${spec#*#} # 1.1.15:0
+            PV=${spec%:*}
+            SLOT=${spec#*:}
+            file="${REPODIR}"/"${REPOSITORY}"/packages/${PN}/${PN}#${PV}.pkg
+        ;;
+        *#*::*) # musl-libc#1.1.15::mutiny; need SLOT
+            REPOSITORY=${spec##*::}
+            PN=${spec%%#*}
+            spec=${spec#*#} # 1.1.15::mutiny
+            PV=${spec%::*}
+            file="${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg
+            [ -f "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+            SLOT=$(riot_source_file --phases=false "${file}" && printf '%s' ${SLOT})
+        ;;
+        *:*::*) # musl-libc:0::mutiny; need PV
+            REPOSITORY=${spec##*::}
+            PN=${spec%%:*}
+            spec=${spec#*:}
+            SLOT=${spec%::*}
+            local versions v
+            for file in "${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#*.pkg; do
+                [ -f "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+                local v=${file##*#}
+                local v=${v%.pkg}
+                if [ "$(riot_source_file --phases=false "${file}"; printf '%s' ${SLOT})" = "${SLOT}" ];then
+                    versions+=( "${v}" )
+                fi
+            done
+            [ -n "${versions[0]}" ] || die "Can't disambiguate \"${1}\"; no versions have this SLOT."
+        ;;
+        *::*) # musl-libc::mutiny, need PV, SLOT
+            REPOSITORY=${spec##*::}
+            PN=${spec%%::*}
+            local versions versions_vercmp v newest
+            for file in "${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#*.pkg;do
+                [ -f "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+                local v=${file##*#}
+                local v=${v%.pkg}
+                versions+=( "${v}" )
+            done
+            PV=$(vercmp --newest "${versions[@]}") 
+            SLOT=$(riot_source_file --phases=false "${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg && printf '%s' ${SLOT})
+        ;;
+        *#*:*) # musl-libc#1.1.15:0, need REPOSITORY
+            PN=${spec%#*}
+            local spec=${spec#*#}
+            PV=${spec%:*}
+            local SLOT=${spec#*:}
+            for REPOSITORY in "${REPOSITORIES[@]}";do
+                local file="${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg
+                if [ -f "${file}" ] && [ $(riot_source_file --phases=false "${file}" && printf '%s' "${SLOT}") = "${SLOT}" ];then
+                    break
+                else
+                    local file=
+                fi
+            done
+            [ -n "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+        ;;
+        *:*) # musl-libc:0, need PV, REPOSITORY
+            PN=${spec%:*}
+            SLOT=${spec#*:}
+            for REPOSITORY in "${REPOSITORIES[@]}";do
+                local file="${REPODIR}"/"${REPOSITORY}"/packages/${PN}
+                if [ -d "${file}" ];then 
+                    for file in "${file}"/${PN}#*.pkg; do
+                        [ -f "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+                        local v=${file##*#}
+                        local v=${v%.pkg}
+                        versions+=( "${v}" )
+                    done
+                    [ $(riot_source_file --phases=false "${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg && printf '%s' ${SLOT}) = "${SLOT}" ] && PV=$(vercmp --newest "${versions[@]}") && break
+                fi
+            done
+        ;;
+        *#*) # musl-libc#1.1.15, need SLOT, REPOSITORY
+            PN=${spec%#*}
+            PV=${spec#*#}
+            for REPOSITORY in "${REPOSITORIES[@]}";do
+                local file="${REPODIR}"/"${REPOSITORY}"/packages/${PN}/${PN}#${PV}.pkg
+                [ -f "${file}" ] && break || file=
+            done
+            [ -n "${file}" ] || die "Can't disambiguate \"${1}\"; no results." 
+            
+            SLOT=$(riot_source_file --phases=false "${file}" && printf '%s' ${SLOT})
+         ;;
+        *) # musl-libc, need PV, SLOT, REPOSITORY
+            PN="${spec}"
+            local v
+            for REPOSITORY in "${REPOSITORIES[@]}"; do
+                local file="${REPODIR}"/"${REPOSITORY}"/packages/${PN}
+                if [ -d "${file}" ];then 
+                    for file in "${file}"/${PN}#*.pkg; do
+                        [ -f "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+                        local v=${file##*#}
+                        local v=${v%.pkg}
+                        versions+=( "${v}" )
+                    done
+                    PV=$(vercmp --newest ${versions[@]})
+                    local file="${REPODIR}"/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg
+set -x
+                    SLOT=$(riot_source_file --phases=false "${file}" && printf '%s' ${SLOT})
+set +x
+                fi
+            done
+            [ -n "${file}" ] || die "Can't disambiguate \"${1}\"; no results."
+        ;;
+    esac
 
-    PV="${file##*/}"
-    PV="${PV##*${PN}-}"
-    PV="${PV/.riot}"
+    local PN="${PV}"
+    local PV="${PV}"
+    local SLOT="${SLOT}"
+    local REPOSITORY="${REPOSITORY}"
 
-    REPOSITORY=${file%/packages/${PN}/${file##*/}}
-    REPOSITORY="${REPOSITORY##*/}"
+    for v in PN PV SLOT REPOSITORY;do
+        if [ -z $(get_var ${v}) ];then
+            die "Something went wrong while disambiguating \"${1}\"; ${v} was not set."
+        fi
+    done
 
-    export PN PV REPOSITORY
+    export PN="${PN}"
+    export PV="${PV}"
+    export FILE="${REPODIR}/${REPOSITORY}/packages/${PN}/${PN}#${PV}.pkg"
     export PNV="${PN}-${PV}"
-    export HOME="${BUILDDIR}"/build/"${PNV}"
-    export BUILD="${HOME}"/build
-    export WORK="${BUILD}"/"${PNV}"
-    export IMAGE="${HOME}"/image
-    export TMPDIR="${HOME}"/tmp
+    export SLOT="${SLOT}"
+    export REPOSITORY="${REPOSITORY}"
+    export SPEC="${PN}#${PV}:${SLOT}::${REPOSITORY}"
+    riot_import=true
+}
 
-    debug "\"${PNV}\"::${REPOSITORY} found at \"${file}\"\n"
-    # shellcheck source=/dev/null
+# riot_source_file [--phases=<true/false>] <file>
+riot_source_file() {
+    local phases installed=false
+    local set_phases=true
+    case "${1}" in
+        --phases=true)
+            local set_phases=true
+            shift
+        ;;
+        --phases=false)
+            local set_phases=false
+            shift
+        ;;
+    esac
+
+    local file="${1}"
+
+    . "${file}" >/dev/null || die "Failed while sourcing \"${file}\"."
+    riot_make_pkg_env
     . "${file}" >/dev/null 2>&1
+
     if [ "$?" -eq 0 ];then
-        return 0
+        if [ "${set_phases}" = true ];then
+            [ "${riot_mode}" = 'install' ] && phases="${riot_install_phases}"
+            for phase in ${phases}; do
+                if type_is_function "${phase}";then
+                    riot_map_phase "${phase}":"${phase}"
+                elif ! type_is_function riot_run_${phase} && ! type_is_function "${phase}" && type_is_function default_"${phase}";then
+                    riot_map_phase "${phase}":default_"${phase}"
+                fi
+            done
+        fi
+
+        riot_check_sourced_pkg
+        return $?
     else
-        die "Failed while sourcing \"${file}\".\n"
+        die "Failed while sourcing \"${FILE}\"."
+    fi
+}
+
+riot_check_sourced_pkg() {
+    local e=0 phase v required_variables
+
+    required_variables=(
+        PN PV SLOT
+    )
+
+    for v in "${required_variables[@]}";do
+        if [ -z "$(get_var ${v})" ];then
+            rerror "${PN}: ${v} is not declared."
+            e=$(( e + 1 ))
+        fi
+    done
+
+    for phase in ${phases};do
+        if ! type_is_function riot_run_${phase};then
+            rerror "${PN}: Nothing is set for ${phase}, but there should be."
+            e=$(( e + 1 ))
+        fi
+    done
+
+    if [ $e -gt 0 ];then
+        die "Package failed ${e} checks, please fix errors."
     fi
 }
 
@@ -251,6 +510,13 @@ riot_jobs() {
 }
 
 riot_make_pkg_env() {
+    [ -n "${BUILDDIR}" ] || riot_func_die riot_make_pkg_env unset BUILDDIR
+    [ -n "${PNV}" ] || riot_func_die riot_make_pkg_env unset PNV
+    edebug export HOME="${BUILDDIR}"/build/"${PNV}"
+    edebug export TMPDIR="${HOME}"/tmp
+    edebug export BUILD="${HOME}"/build
+    edebug export IMAGE="${HOME}"/image
+    edebug export WORK="${BUILD}"/"${PNV}"
     [ -e "${HOME}" ] && edebug rm -rf "${HOME}"
     edebug mkdir -p "${BUILD}" "${IMAGE}" "${TMPDIR}"
     cd "${BUILD}"
@@ -261,11 +527,49 @@ riot_rm_pkg_env() {
     [ "${HOME}" = "${BUILDDIR}"/build/"${PNV}" ] && edebug rmdir "${HOME}"
 }
 
+riot_check_image() {
+    local image="${1}"
+    riot_recurse "${image}" "riot_check_image_handler \"${image}\""
+    if [ ${riot_check_image_errors} -gt 0 ];then
+        die "Image failed ${riot_check_image_errors} checks, please fix errors."
+    fi
+    unset riot_check_image_errors
+}
+
+dir_is_empty() {
+   local oldpwd="${PWD}"
+    [ -d "${1}" ] && cd "$1" || return 127
+    set -- .[!.]*
+    test -e "$1" && cd "${oldpwd}" && return 1
+    set -- ..?*
+    test -e "$1" && cd "${oldpwd}" && return 1
+    set -- * 
+    test -e "$1" && cd "${oldpwd}" && return 1
+    cd "${oldpwd}" && return 0
+}
+
+
+riot_check_image_handler() {
+    local image="${1}" f="${2}"
+    riot_check_image_errors=${riot_check_image_errors:-0}
+    # Check directories
+    if [ -d "${2}" ];then
+        if dir_is_empty "${2}";then
+            riot_check_image_errors=$(( riot_check_image_errors + 1 ))
+            rerror "Empty directory: ${2}"
+        fi
+    fi
+}
+
 riot_merge() {
     local src="${1}" dest="${2}"
     riot_recurse "${src}" "riot_merge_handler \"${src}\" \"${dest}\""
-    edebug mkdir -p "${INSTALLDBDIR}"/"${CHOST}"/"${PNV}"/
-    edebug mv -f "${TMPDIR}"/riot_file_list "${INSTALLDBDIR}"/"${CHOST}"/"${PNV}"/files
+    edebug mkdir -p "${INSTALLDIR}"/"${CHOST}"/"${PNV}"/
+    edebug mv -f "${TMPDIR}"/riot_file_list "${INSTALLDIR}"/"${CHOST}"/"${PNV}"/files
+    edebug riot_print_sourced_pkg_env > "${INSTALLDIR}"/"${CHOST}"/"${PNV}"/env
+    edebug riot_print_sourced_pkg_funcs >> "${INSTALLDIR}"/"${CHOST}"/"${PNV}"/env
+    edebug riot_print_sourced_pkg_metadata >> "${INSTALLDIR}"/"${CHOST}"/"${PNV}"/metadata
+
 }
 
 riot_merge_handler() {
@@ -307,7 +611,7 @@ riot_merge_handler() {
 riot_resolve_dependencies() {
     local dep skip skip_pkgs exec exec_unless_installed
     while [ "${1}" = --skip ];do
-        skip_pkgs="${skip_pkgs} ${2}"
+        skip_pkgs+=( "${2}" )
         shift 2
     done
     while [ "${1}" = --exec ];do
@@ -319,79 +623,81 @@ riot_resolve_dependencies() {
         shift
     fi
     for dep in "${@}";do
-        case " ${skip_pkgs} " in
-            *" ${dep} "*)
-                debug "Skipping ${dep}\n"
-                continue
-            ;;
-            *)
-                debug "Resolving ${dep}\n"
-            ;;
-        esac
+        if contains "${dep}" "${skip_pkgs[*]}";then
+            debug "Skipping ${dep}"
+            continue
+        else
+            debug "Resolving ${dep}"
+        fi
         file=$(riot_locate_pkg "${dep}") || die "Failed to locate \"${dep}\".\n"
         "${exec_unless_installed:-${exec}}" "${dep}"
     done
 }
 
-riot_check_installed() {
-    local pkg
-    for pkg in "$@";do
-        riot_clear_env
-        riot_source_pkg "${pkg}"
-        [ -d "${INSTALLDB_DIR}"/"${CHOST}"/"${PNV}" ] || return 1
+riot_mode_install() {
+    local phase pkg packages
+    riot_mode=install
+    while [ $# -ne 0 ];do
+        if riot_disambiguate_spec "$1";then
+            packages+=( "${SPEC}" )
+        else
+            return 127
+        fi
+        shift
     done
-    return 0
-}
 
-riot_pkg_install() {
-    local phase pkg
-    for pkg in "$@";do
-        riot_clear_env
+    for pkg in "${packages[@]}";do
         riot_source_pkg "${pkg}"
-        if [ -n ${BUILD_DEPENDENCIES} ] || [ -n ${INSTALL_DEPENDENCIES} ];then
-            local BUILD_DEPENDENCIES="${BUILD_DEPENDENCIES}" INSTALL_DEPENDENCIES="${INSTALL_DEPENDENCIES}"
-            riot_resolve_dependencies --skip "${pkg}" --exec "riot_pkg_install" --exec-unless-installed ${BUILD_DEPENDENCIES} ${INSTALL_DEPENDENCIES}
+        if [ -n "${BUILD_DEPENDENCIES[0]}" ] || [ -n "${INSTALL_DEPENDENCIES[0]}" ];then
+            riot_resolve_dependencies --skip "${SPEC}" --exec "riot_mode_install" --exec-unless-installed "${BUILD_DEPENDENCIES[@]}" "${INSTALL_DEPENDENCIES[@]}"
             riot_clear_env
             riot_source_pkg "${pkg}"
         fi
-        riot_set_phases
+
         riot_make_pkg_env
-        rinfo "Installing ${pkg}"
+        rinfo "Installing ${SPEC}"
         for phase in ${riot_install_phases};do
-            riot_run_"${phase}" || die "Failed during \"${phase}\" phase.\n"
+            riot_run_"${phase}" || die "Failed during \"${phase}\" phase."
+            riot_unmap_phase "${phase}"
         done
         riot_rm_pkg_env
-        rsuccess "Installed ${pkg}"
+        rsuccess "Installed ${SPEC}"
     done
 }
 
-riot_pkg_info() {
+riot_mode_uninstall() {
+    local phase pkg
+    for pkg in "$@";do
+        riot_source_pkg --installed "${CHOST}" "${pkg}"
+        riot_print_pkg_env
+    done
+}
+
+riot_mode_info() {
     local pkg var var_arr var_item pretty_name env
     for pkg in "${@}";do
-        riot_clear_env
         riot_source_pkg "${pkg}"
-        printf "${color_bold}%s${color_red}::%s${color_reset}\n" "${pkg}" "${REPOSITORY}"
+        printf "${color_bold}%s${color_green}%s${color_red}::%s${color_reset}\n" "${PN}" "#${PV}:${SLOT}" "${REPOSITORY}"
 
         for var in "${METADATA_VARIABLES[@]}";do
             case "${var}" in
+                hidden:*) continue ;;
                 *:*)
                     pretty_name=${var#*:}
                     var=${var%%:*}
                 ;;
-                *)
-                    pretty_name=${var}
-                ;;
+                *) pretty_name=${var}; ;;
             esac
 
             if [ -n "$(get_var ${var})" ];then
                 if variable_is_array "${var}";then
-                    eval "var_arr=( \"\${${var}[@]}\""
-                    if [ "$#" -gt 1 ];then
-                        printf "\t${color_bold}%-20s${color_reset}\n" "${pretty_name}"
-                        printf "\t\t%-20s\n" "${var_arr[@]}"
-                    else
-                        printf "\t${color_bold}%-19s${color_reset} %s\n" "${pretty_name}" "$(trim_space "$(get_var ${var})")"
-                    fi
+                    eval "var_arr=( \"\${${var}[@]}\" )"
+                    #if [ "$#" -gt 1 ];then
+                    printf "\t${color_bold}%-20s${color_reset}\n" "${pretty_name}"
+                    printf "\t\t%-20s\n" "${var_arr[@]}"
+                    #else
+                    #    printf "\t${color_bold}%-19s${color_reset} %s\n" "${pretty_name}" "$(trim_space "$(get_var ${var})")"
+                    #fi
                 else
                     printf "\t${color_bold}%-19s${color_reset} %s\n" "${pretty_name}" "$(trim_space "$(get_var ${var})")"
                 fi
@@ -400,9 +706,30 @@ riot_pkg_info() {
     done
 }
 
+riot_mode_files() {
+    local pkg
+    for pkg in "${@}";do
+        case "${pkg}" in
+            *-*)
+                [ -e "${pkg}"/files ] || die "${pkg} is not installed"
+            ;;
+            *)
+                pkg=( "${INSTALLDIR}"/"${CHOST}"/${pkg}* )
+            ;;
+        esac
+    done
+}       
+
+riot_mode_disambiguate() {
+    local pkg
+    riot_mode=disambiguate
+    for pkg in "${@}";do
+        riot_disambiguate_spec "${pkg}"
+        printf '%s\n' "${SPEC}"
+    done
+}
+
 trim_space() {
     printf '%s' "$@" | sed '1,/^./{/./!d};s/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
-# ALLOWED_VARIABLES: variables which should be preserved from any calling environment
-ALLOWED_VARIABLES=(CBUILD CHOST CTARGET OPTIND PATH TERM PHASE JOBS BUILDDIR CACHEDIR INSTALLDBDIR PKGDIR)

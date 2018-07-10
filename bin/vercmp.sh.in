@@ -1,0 +1,253 @@
+#!/bin/sh
+#
+# Riot, a from-source package manager for Mutiny Linux.
+#
+# Copyright (c) 2016 Kylie McClain <kylie@somasis.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE
+
+export LC_ALL=C
+
+if [ "$1" = -q ];then
+    quiet=true
+    shift
+else
+    quiet=false
+fi
+
+if [ "$1" = -d ];then
+    debug=true
+    shift
+else
+    debug=false
+fi
+
+debug() {
+    if "${debug}";then
+        printf '%s: %s\n' "${0##*/}" "${@}" >&2
+    fi
+}
+
+quiet() {
+    if "${quiet}";then
+        return 0
+    else
+        return 1
+    fi
+}
+
+longest_line() {
+    longest_line_length=0
+    for line in "${@}";do # XXX: using a while loop here creates a subshell in bash
+        if [ ${#line} -gt ${longest_line_length} ];then
+            longest_line_length="${#line}"
+        fi
+    done
+    printf '%s' "${longest_line_length}"
+}
+
+count_parts() {
+    printf '%s\n' $(( $(tr '.\n' '\n.' | wc -l) ))
+}
+
+normalize() {
+    normalize_to="${1}"; shift
+    v="${1}"; orig_v="${v}"
+    if [ $(printf '%s\n' "${v}" | count_parts) -lt ${normalize_to} ];then
+        printf '%s\n' "${v}"
+    fi
+    until [ $(printf '%s\n' "${v}" | count_parts) -eq ${normalize_to} ];do
+        v="${v}.0"
+    done
+
+    debug "normalized ${orig_v} to ${v}"
+    printf '%s\n' "${v}"
+}
+
+is_number() {
+    expr match "${1}" "[0-9]*$" >/dev/null
+}
+
+newer_than() {
+    longest=$(longest_line "$(printf '%s\n' "${1}.0" "${2}.0" | tr -cd '.\n')")
+    v1="${1}"
+    v2="${2}"
+
+    p=1
+    until [ "${p}" -gt ${longest} ];do
+        p1=$(printf '%s\n' "${v1}" | cut -d. -f${p})
+        p2=$(printf '%s\n' "${v2}" | cut -d. -f${p})
+        [ -n "${p1}" ] || p1=0
+        [ -n "${p2}" ] || p2=0
+
+        if [ ${#p1} -lt ${#p1} ];then
+            case "${p1}" in
+                *.*)
+                    until [ ${#p2} -eq ${#p1} ];do
+                        p2=${p2}0
+                    done
+                ;;
+            esac
+        fi
+
+        # handle non-numbers
+        if ! is_number "${p1}" && is_number "${p2}";then
+            debug "(comparing part $p) ${p1} is greater than ${p2} since ${p1} is not a number"
+            return 0
+        elif is_number "${p1}" && ! is_number "${p2}";then
+            debug "(comparing part $p) ${p1} is greater than ${p2} since ${p2} is not a number"
+            return 0
+        elif ! is_number "${p1}" && ! is_number "${p2}";then
+            p1_frag=$(expr match "${p1}" "\D*\(\d*\)")
+            p2_frag=$(expr match "${p2}" "\D*\(\d*\)")
+            if [ "${p1_frag}" -gt "${p2_frag}" ];then
+                debug "(comparing part $p) ${p1}'s numeric portion is greater than ${p2}, so we will skip comparison of this part"
+                p1=0; p2=0
+            elif [ "${p1_frag}" -eq "${p2_frag}" ];then
+                debug "(comparing part $p) ${p1}'s numeric portion is the same as ${p2}, so we will do ascii comparison"
+                debug "(comparing part $p) changing ${p1} and ${p2} to their ascii codes"
+                p1_frag="${p1#${p1_frag}}"
+                p2_frag="${p2#${p2_frag}}"
+                p1=; p2=;
+                p1_frag=$(printf '%s' "${p1_frag}" | sed 's/alpha/a/g;s/beta/b/g;s/rc/r/g')
+                p2_frag=$(printf '%s' "${p2_frag}" | sed 's/alpha/a/g;s/beta/b/g;s/rc/r/g')
+                for part in $(printf '%s' "${p1_frag}" | sed 's/./&\n/g');do
+                    p1=$p1$(printf %d "'${part}")
+                done
+                for part in $(printf '%s' "${p2_frag}" | sed 's/./&\n/g');do
+                    p2=$p2$(printf %d "'${part}")
+                done
+            else
+                debug "(comparing part $p) ${p1}'s numeric portion is less than ${p2}, so we will do no more comparisons"
+                return 1
+            fi
+        fi
+
+        # only numbers can be compared here
+        if [ ${p1} -gt ${p2} ];then
+            debug "(comparing part $p) ${p1} is greater than ${p2}"
+            return 0
+        elif [ ${p1} -lt ${p2} ];then
+            debug "(comparing part $p) ${p1} is less than ${p2}"
+            return 1
+        else
+            debug "(comparing part $p) ${p1} is equal to ${p2}"
+            res=equal
+        fi
+        p=$(( p + 1 ))
+    done
+    [ $res = equal ] && return 2
+}
+
+newest() {
+    while [ $# -gt 0 ];do
+        newer_than "${1}" "${biggest:-0}" && biggest="${1}"
+        shift
+    done
+    printf '%s\n' "${biggest}"
+}
+
+oldest() {
+    while [ $# -gt 0 ];do
+        newer_than "${1}" "${oldest:-1}" || oldest="${1}"
+        shift
+    done
+    printf '%s\n' "${oldest}"
+}
+
+match() {
+    against="${1}"; shift
+    set -- $(printf '%s\n' "$@" | tr '&' '\n')
+    for rule in "$@";do
+        n=$(( ${n:-0} + 1 ))
+        result=1
+        case "${rule}" in
+           =*)
+                newer_than "${rule#=}" "${against}"; e=$?
+                [ $e -eq 2 ] && result=0
+            ;;
+           '>='*)
+                newer_than "${rule#>=}" "${against}"; e=$?
+                case $e in
+                    1|2) result=0 ;;
+                esac
+            ;;
+            '<='*)
+                newer_than "${rule#<=}" "${against}"; e=$?
+                case $e in
+                    0|2) result=0 ;;
+                esac
+            ;;
+            '>'*)
+                newer_than "${rule#>}" "${against}"; e=$?
+                [ $e -eq 1 ] && result=0
+            ;;
+            '<'*)
+                newer_than "${rule##<}" "${against}"; e=$?
+                [ $e -eq 0 ] && result=0
+            ;;
+        esac
+        if [ $n -ge 1 ];then
+            exit $result
+        fi
+    done
+}
+
+case "${1}" in
+    --help|'')
+        printf 'vercmp\n'
+        printf '    %-26s - %s\n' \
+            "--help" "display this help" \
+            "--newer-than <v1> <v2>" "exit 0 if <v1> is newer than <v2>" \
+            "--older-than <v1> <v2>" "exit 0 if <v1> is older than <v2>" \
+            "--newest <version ...>" "print newest version out of <version>s given" \
+            "--oldest <version ...>" "print oldest version out of <version>s given"
+        printf 'vercmp --match <compare> <operation>\n'
+        printf '    --match %-5s %-12s - %s\n' \
+            "1.2"   "=1.2.0"    "exit 0 if 1.2 is equivalent to 1.2.0" \
+            "3.5.3" ">=3.5.2"   "exit 0 if 3.5.3 is greater than or equal to 3.5.2" \
+            "3.5.1" "<=3.5.2"   "exit 0 if 3.5.1 is lesser than or equal to 3.5.2" \
+            "3.5.3" ">3.5.2"    "exit 0 if 3.5.3 is greater than 3.5.2" \
+            "3.5.1" "<3.5.2"    "exit 0 if 3.5.1 is less than 3.5.2"
+        printf '    operators may also be chained...\n'
+        printf '    --match %-5s %-12s - %s\n' \
+            "3.5"   ">=3.4.0.2&<4"  "exit 0 if 3.5 is greater than or equal to 3.4.0.2, and less than 4"
+        exit 0
+    ;;
+    --newer-than)
+        shift; newer_than "$1" "$2"
+    ;;
+    --older-than)
+        shift;
+        newer_than "$1" "$2"; e=$?
+        if [ $e -eq 1 ];then
+            exit 0
+        elif [ $e -eq 0 ];then
+            exit 1
+        else
+            exit $e
+        fi
+    ;;
+    --newest)
+        shift; newest "$@"
+    ;;
+    --oldest)
+        shift; oldest "$@"
+    ;;
+    --match)
+        shift; match "$@"
+    ;;
+    *)
+        exit 127
+    ;;
+esac

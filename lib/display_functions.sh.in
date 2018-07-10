@@ -17,26 +17,25 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 stderr() {
-    # shellcheck disable=SC2059
     printf "$@" >&2
 }
 
 debug() {
     if [ -n "$1" ];then
-        "${riot_debug}" && stderr "riot: $@"
+        "${riot_debug}" && stderr "riot: $@\n"
     else
         "${riot_debug}"; return $?
     fi
 }
 
 edo() {
-    # shellcheck disable=SC2059
     raction "$@"
     if "${riot_quiet}";then
         "$@" >/dev/null 2>&1
     else
         "$@"
     fi
+    [ $? -eq 0 ] || die "\`$*\` failed"
 }
 
 edebug() {
@@ -45,6 +44,10 @@ edebug() {
     else
         "${@}"
     fi
+}
+
+rerror() {
+    stderr "${color_bold}${color_red}!!!${color_reset} %s\n" "$*"
 }
 
 raction() {
@@ -79,16 +82,16 @@ riot_color_init() {
         ;;
     esac
     if [ "${riot_color}" = true ];then
-        export color_reset='\e[0m'
-        export color_bold='\e[1m'
-        export color_black='\e[30m'
-        export color_red='\e[31m'
-        export color_green='\e[32m'
-        export color_yellow='\e[33m'
-        export color_blue='\e[34m'
-        export color_purple='\e[35m'
-        export color_cyan='\e[36m'
-        export color_white='\e[37m'
+        color_reset='\e[0m'
+        color_bold='\e[1m'
+        color_black='\e[30m'
+        color_red='\e[31m'
+        color_green='\e[32m'
+        color_yellow='\e[33m'
+        color_blue='\e[34m'
+        color_purple='\e[35m'
+        color_cyan='\e[36m'
+        color_white='\e[37m'
     fi
 }
 
