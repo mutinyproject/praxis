@@ -1,0 +1,4 @@
+#!/bin/sh
+
+path=$(riot-path $(riot-disambiguate "${spec}"))
+
