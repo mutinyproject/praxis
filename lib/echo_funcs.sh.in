@@ -1,0 +1,15 @@
+#!/bin/sh
+
+debug() {
+    if [ $# -eq 0 ];then
+        [ "${praxis_debug}" = "true" ]
+    else
+        [ "${praxis_debug}" = "true" ] && printf 'debug: %s\n' "$@" >&2
+    fi
+}
+
+edo() {
+    printf '+ %s\n' "$*" >&2
+    "$@"
+}
+

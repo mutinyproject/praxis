@@ -1,0 +1,9 @@
+#!/bin/sh
+
+import() {
+    : import is a stub >&2
+}
+
+library() {
+    : library is a stub >&2
+}

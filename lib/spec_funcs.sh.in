@@ -1,0 +1,134 @@
+#!/bin/sh
+
+spec_validate() {
+    while [ $# -gt 0 ];do
+        if ! printf '%s\n' "$1" | grep -Eq '^(([A-Za-z0-9_+-]+)(#[0-9a-z\._-]+)?(:[0-9\.]+)?(::[0-9A-Za-z_-]+)?)$';then
+            debug "$1 isn't a valid package spec."
+            exit 1
+        fi
+        shift
+    done
+}
+
+# spec_disambiguate(): give the fully qualified specification for any possibly partial spec given
+spec_disambiguate() {
+    while [ $# -gt 0 ];do
+        set | grep -E '^(PN|PV|REPOSITORY|SLOT)'
+        printf '+ disambiguating %s\n' "$1" >&2
+        case "${1}" in
+            *#*:*::*) # Fully qualified specification, nothing further needed
+                PN="${1%%#*}"
+                PV="${1##${PN}#}"; PV="${PV%%:*}"
+                REPOSITORY="${1##*${PN}#${PV}:*::}"
+
+                spec_disambiguate_slot="${1##${PN}#${PV}:}"
+                spec_disambiguate_slot="${spec_disambiguate_slot%%::*}"
+                SLOT=$(
+                    (
+                        spec_disambiguate_file="${praxis_repo_dir}"/"${REPOSITORY}"/packages/"${PN}"/"${PN}#${PV}".theory0
+                        [ -f "${spec_disambiguate_file}" ] && . "${spec_disambiguate_file}"
+                        [ -n "${SLOT}" ] && printf '%s\n' "${SLOT}"
+                    )
+                )
+            ;;
+
+            *#*::*) # Missing slot
+                PN="${1%%#*}"
+                PV="${1##${PN}#}"; PV="${PV%%::*}"
+                REPOSITORY="${1##${PN}#${PV}::}"
+
+                # Prefer the slot with the highest number
+                SLOT=$(
+                    (
+                        spec_disambiguate_file="${praxis_repo_dir}"/"${REPOSITORY}"/packages/"${PN}"/"${PN}#${PV}".theory0
+                        [ -f "${spec_disambiguate_file}" ] && . "${spec_disambiguate_file}"
+                        [ -n "${SLOT}" ] && printf '%s\n' "${SLOT}"
+                    ) | sort -n | tail -n1
+                )
+            ;;
+            *#*:*) # Missing repository
+                PN="${1%%#*}"
+                PV="${1##${PN}#}"; PV="${PV%%:*}"
+                spec_disambiguate_slot="${1##${PN}#${PV}:}"
+                for spec_disambiguate_repo in $(repo_list --paths);do
+                    spec_disambiguate_file="${spec_disambiguate_repo}"/packages/"${PN}"/"${PN}#${PV}".theory0
+                    SLOT=$(
+                        (
+                            [ -f "${spec_disambiguate_file}" ] && . "${spec_disambiguate_file}"
+                            [ "${SLOT}" = "${spec_disambiguate_slot}" ] && printf '%s\n' "${SLOT}"
+                        )
+                    )
+                done
+                set +x
+            ;;
+            *#*) # Missing slot, repository
+                PN="${1%%#*}"
+                PV="${1##${PN}#}"
+                for spec_disambiguate_repo in $(repo_list --paths);do
+                    spec_disambiguate_file="${spec_disambiguate_repo}"/packages/"${PN}"/"${PN}#${PV}".theory0
+                    if [ -f "${spec_disambiguate_file}" ];then
+                        REPOSITORY="${spec_disambiguate_repo##*/}"
+                        SLOT=$(
+                            [ -f "${spec_disambiguate_file}" ] && . "${spec_disambiguate_file}"
+                            [ -n "${SLOT}" ] && printf '%s\n' "${SLOT}" && return 3
+                        )
+                            
+                        break
+                    fi
+                done
+            ;;
+            *:*::*) # Missing version
+                REPOSITORY="${1##*::}"
+                PN="${1%%:*}"
+                SLOT="${1%%::*}"; SLOT="${SLOT##*:}"
+            ;;
+            *::*) # Missing version, slot
+                PN="${1%%::*}"
+                REPOSITORY="${1##*::}"
+            ;;
+            *:*) # Missing version, repository
+                PN="${1%%:*}"
+                SLOT="${1##*:}"
+            ;;
+            *) # Only a name, or something weird
+                if ! printf '%s\n' "$1" | grep -Eq '^[A-Za-z0-9_+-]+$';then
+                    debug "$1 isn't a valid package spec."
+                    exit 1
+                 fi
+
+                PN="${1}"
+            ;;
+        esac
+
+        unset spec_disambiguate_{repo,file,slot}
+
+        shift
+
+        [ -n "${PN}" ] || { debug "Can't do any disambiguation if we don't have a name."; exit 1; }
+
+        FILE="${praxis_repo_dir}"/"${REPOSITORY}"/packages/"${PN}"/"${PN}#${PV}.theory0"
+        [ -f "${FILE}" ] || unset FILE
+        
+        for v in PN PV SLOT REPOSITORY FILE;do
+            vc=$(echo eval printf '%s' \$$v)
+            if [ -z "${vc}" ];then
+                debug "${v} is unset."
+                exit 1
+            fi
+        done
+        unset v v
+        exit
+
+        export SOURCE_DATE_EPOCH=$(stat -c %Y "${FILE}")
+
+        export PN PV SLOT REPOSITORY FILE
+
+        printf '%s#%s:%s::%s\n' \
+            "${PN}" \
+            "${PV}" \
+            "${SLOT}" \
+            "${REPOSITORY}"
+        unset PN PV SLOT REPOSITORY
+    done
+}
+

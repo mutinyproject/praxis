@@ -1,0 +1,17 @@
+#!/bin/sh
+
+cleanenv() {
+    set -- $(set | sed -E '/=/!d; s/(\[[0-9]*\])?=.*//')
+    while [ $# -gt 0 ]; do
+        case "${1}" in
+            IFS|PATH|TERM|_) : ;;
+            praxis_*) : ;;
+            *) unset -v "${1}" >/dev/null 2>&1 ;;
+        esac
+        shift
+    done
+
+    export SHELL=/bin/sh
+    export TZ=UTC
+    export LANG=C.UTF-8
+}
