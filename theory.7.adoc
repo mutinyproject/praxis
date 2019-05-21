@@ -1,4 +1,6 @@
 = theory(7)
+Kylie J. McClain <kylie@somas.is>
+
 :description: Theory is the package API for Mutiny systems.
 :toc: right
 :toclevels: 4
