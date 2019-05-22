@@ -101,13 +101,13 @@ use to a repository with no package.
 
 ==== Package specifications
 
-Package specifications (also referred to as ``specs'') are strings which
+Package specifications (informally referred to as "specs") are strings which
 describe a package.
 
 Specifications take on multiple permutations, because they are made up
 of four different parts, of which only the name is required.
 
-Given the fully-qualified spec `package#1.0:1::repository`…
+Given the fully-qualified spec `package#1.0:1::repository`...
 
 * Package name (`package`)
 * Package version (`1.0`)
