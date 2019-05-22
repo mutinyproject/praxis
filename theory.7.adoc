@@ -25,8 +25,8 @@ https://tools.ietf.org/html/rfc2119[RFC 2119].
 == Repositories
 
 Package managers *must* support multiple repositories. The internal sorting of these repositories
-is dictated by the link:#Importance[importance]; user-facing sort, (ex. when listing repositories
-installed on the system) is not defined.
+is dictated by the <<Importance>> user-facing sort, (ex. when listing repositories installed on
+the system) is not defined.
 
 The file and directory layout of a valid repository is as follows, _italicized_ items representing
 optional items, anything else required:
