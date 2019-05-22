@@ -18,7 +18,7 @@ This page consists of documentation on the design of the `praxis` package manage
 * Multiple repositories
     ** Intra-repository dependencies
     ** Important levels
-        *** `::canon` is the most important repository
+        *** `::primary` is the most important repository
         *** Other repositories can always depend on libraries in repositories that are more important
 * Repository synchronization
     ** we might not want to have `git` in the basic system requirements
