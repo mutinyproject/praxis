@@ -152,34 +152,31 @@ useful to be given up, and isn’t yet specified in POSIX…
 * Iterating through arrays (`for item in "${array[@]}";do ... done`)
 * Appending to arrays (`array+=( "xyzzy" )`)
 
-Build environment
------------------
+== Build environment
 
-When referring to a ``build environment'', this document is referring to
+When referring to a "build environment", this document is referring to
 the literal shell environment which the shell process is running in.
 This means it consists of things such as variables, functions, and
 current working directory.
 
-Phases
-~~~~~~
+=== Phases
 
 Everything in this section is *required* of any package manager
 implementation.
 
-``By default'' refers to a package which does not define any phases or
+"By default" refers to a package which does not define any phases or
 import any libraries which define phases.
 
-Note the difference between ``not defined'' and ``does nothing''.
+Note the difference between "not defined" and "does nothing".
 Packages *must* have each phase defined, regardless of if they have any
 function; if a phase listed here is not defined by either the package
 manager, or the package (or a library used by the package), the package
 manager *must* error out and fail, because that is an invalid package.
 
-``Does nothing'' would mean something like `pkg_init() { true; }`. ``Not
-defined'' would mean no definition of the function.
+"Does nothing" would mean something like `pkg_init() { true; }`. "Not
+defined" would mean no definition of the function.
 
-`pkg_init()`
-^^^^^^^^^^^^
+==== `pkg_init()`
 
 This phase is ran when a build environment is created for a package
 building session. Normally nothing is done, and this is a dummy
@@ -189,8 +186,7 @@ Examples of other defintions could be creating a custom `PATH` and
 script wrappers to be used for build systems that are stubborn to
 cooperate with cross-compilation.
 
-`src_fetch()`
-^^^^^^^^^^^^^
+==== `src_fetch()`
 
 *Only ran during installation.*
 
@@ -204,8 +200,7 @@ Usually you will not need to change this.
 Examples of other definitions could include retrieval of `git` sources,
 `hg`, `cvs`, etc.
 
-`src_unpack()`
-^^^^^^^^^^^^^^
+==== `src_unpack()`
 
 *Only ran during installation.*
 
@@ -217,8 +212,7 @@ directory, and then change into `WORK`.
 Examples of other definitions could include checking out `git` sources
 into `WORK`, or similar.
 
-`src_prepare()`
-^^^^^^^^^^^^^^^
+==== `src_prepare()`
 
 *Only ran during installation.*
 
@@ -229,8 +223,7 @@ here.
 
 By default it does nothing.
 
-`src_configure()`
-^^^^^^^^^^^^^^^^^
+==== `src_configure()`
 
 *Only ran during installation.*
 
@@ -240,8 +233,7 @@ configuration files would be done here.
 
 By default it is not defined.
 
-`src_compile()`
-^^^^^^^^^^^^^^^
+==== `src_compile()`
 
 *Only ran during installation.*
 
@@ -250,8 +242,7 @@ Things like `make`, `ninja`, etc. would be done here.
 
 By default it is not defined.
 
-`src_test()`
-^^^^^^^^^^^^
+==== `src_test()`
 
 *Only ran during installation.*
 
@@ -260,8 +251,7 @@ like `make check`, `ctest`, `./setup.py test`, etc. are done here.
 
 By default it is not defined.
 
-`src_install()`
-^^^^^^^^^^^^^^^
+==== `src_install()`
 
 *Only ran during installation.*
 
@@ -273,21 +263,18 @@ outside the build environment.
 
 By default it is not defined.
 
-`pkg_preinstall()`
-^^^^^^^^^^^^^^^^^^
+==== `pkg_preinstall()`
 
 *Only ran during installation.*
 
 This phase’s purpose is to run any link:#Package%20Triggers[package
 triggers].
 
-`pkg_install()`
-^^^^^^^^^^^^^^^
+==== `pkg_install()`
 
 *Only ran during installation.*
 
-Package Triggers
-~~~~~~~~~~~~~~~~
+=== Package Triggers
 
 Package triggers are scripts ran on directories or files being modified
 during `pkg_merge()`.
@@ -300,8 +287,7 @@ must be in the format of:
 PKG_PREINSTALL_TRIGGERS+=( "mkinitramfs:/boot:/usr/${CHOST}/lib/modules" )
 ....
 
-Directories
-~~~~~~~~~~~
+=== Directories
 
 The only requirements of the directory in which a package build is
 executed is that it is read-write accessable by the package manager, and
