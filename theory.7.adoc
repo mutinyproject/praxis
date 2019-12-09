@@ -23,9 +23,11 @@ https://tools.ietf.org/html/rfc2119[RFC 2119].
 
 == Repositories
 
-Package managers *must* support multiple repositories. The internal sorting of these repositories
-is dictated by the <<Importance>> user-facing sort, (ex. when listing repositories installed on
-the system) is not defined.
+Package managers *must* support multiple repositories. The internal prioritization of these
+repositories is dictated by the <<priority>>. User-facing sort (ex. when listing repositories
+installed on the system) is not defined.
+
+Repository names are alphanumeric plus `_` and `-`.
 
 The file and directory layout of a valid repository is as follows, _italicized_ items representing
 optional items, anything else required:
@@ -33,8 +35,8 @@ optional items, anything else required:
 * <repository name>/
     ** metadata/
         *** _dependencies_
-        *** _description_
-        *** importance
+        *** _summary_
+        *** priority
     ** _libraries_/
         *** library1.lib0
     ** packages/
@@ -54,12 +56,6 @@ optional items, anything else required:
 
 Repositories *must* have a directory in their root named `metadata`.
 
-==== Importance
-
-Repositories *must* have a file within `metadata`, named `importance`.
-The `importance` file *must* contain a valid integer; newlines are
-ignored.
-
 ==== Dependencies (optional)
 
 Repositories *may* contain a file in `metadata`, named `dependencies`.
@@ -73,25 +69,24 @@ Any repository listed will have its `libraries` directory searched when
 parsing package files; the order in which they are searched is
 determined by the `importance` value of the repository.
 
-Do not add repositories to `dependencies` simply because a package in
-your repository depends on something in another repository. Package
-managers will deal with determining what repository needs to be
-installed to satisfy a dependency through usage of the
-link:#universe[`universe` meta-repository].
+==== Summary
 
-==== Description (recommended, optional)
+Repositories *should* have a summary. The summary should be a short, one-line blurb describing the
+repository's contents or objective.
 
-Repositories *should* contain a file within their `metadata` directory
-named `description`. This file is used for giving a description of the
-repository’s contents.
+==== Priority
 
-The first line of the `description` file *should* provide a short
-summary of the repository’s contents, or the objective of the
-repository; keep it less than 50 characters if possible.
+Repositories *must* have a file within `metadata` named `priority`.
+The `priority` file *must* contain a non-negative integer.
 
-Any lines afterwards will be used as a longer description which can
-contain any arbitrary information the repository author deems useful or
-applicable.
+The intended scheme goes like so:
+[start=0]
+. First-party primary repository, over which nothing has a greater priority
+   There should only be one repository with this level. (ex. Base packages for a system.)
+. First-party secondary repository (such as a supplementary repository).
+   (ex. Repositories containing software categories or projects; GNOME, KDE...)
+. First-party tertiary repository. (ex. A distribution developer's repository.)
+. Third-party repository. (ex. A distribution user's repository.)
 
 === Packages
 
