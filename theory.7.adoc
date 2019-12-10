@@ -38,19 +38,22 @@ optional items, anything else required:
         *** _summary_
         *** priority
     ** _libraries_/
-        *** library1.lib0
+        *** library1
     ** packages/
-        *** openssh/
-            **** openssh#1.2.3.theory0
-            **** openssh#2.3.4.theory0
-            **** _files_/
-                ***** _s6_/
-                    ****** _opensshd_/
-                        **** _run_
-                ***** _patches_/
-        *** _openssh-1.0.0-fix.patch_
-        *** package/
-            **** package#3.theory0
+        *** openssh#1.2.3/ - This directory's path is exported as `${PKGDIR}`.
+            **** _dependencies_
+            **** _libraries_ - Libraries to be used for constructing the package's theory.
+            **** _sha256sum_
+            **** _sources_
+            **** theory0
+            **** _metadata/_ - All files under this directory are exported as environment variables
+                               after importing all libraries.
+                ***** _HOMEPAGE_
+                ***** _LICENSES_
+                ***** _SUMMARY_
+            **** _files/_ - This directory's path is exported as `${FILES}`.
+                ***** _patches/_
+                    ****** _openssh-1.2.3-backport.patch_
 
 === Repository metadata
 
@@ -58,16 +61,17 @@ Repositories *must* have a directory in their root named `metadata`.
 
 ==== Dependencies (optional)
 
-Repositories *may* contain a file in `metadata`, named `dependencies`.
-The `dependencies` file *must* contain a single repository on each line.
-Repositories listed in this file are repositories which the package
-manager *must* have installed prior to the installation of the
-repository depending on them. The order in which they are listed is
-arbitrary.
+Repositories *may* contain a file in `metadata`, named `dependencies`. The `dependencies` file *must*
+contain a single repository on each line. Repositories listed in this file are repositories which the
+package manager *must* have installed prior to the installation of the repository depending on them.
+The order in which they are listed is unspecified.
 
-Any repository listed will have its `libraries` directory searched when
-parsing package files; the order in which they are searched is
-determined by the `importance` value of the repository.
+Any repository listed will have its `libraries` directory searched when parsing package files; the order
+in which they are searched is determined by the `priority` value of the repository.
+
+Do not add repositories to `dependencies` simply because a package in your repository depends on something
+in another repository. The package manager *shall* deal with determining what repository needs to be
+installed to satisfy a dependency through usage of the link:#universe[`universe` meta-repository].
 
 ==== Summary
 
