@@ -110,6 +110,7 @@ Given the fully-qualified spec `package#1.0::repository`...
 * Package version (`1.0`)
 * Package repository (`repository`)
 
+// If you're reading this in the .adoc, remove the `$$ and $$` from the regex to get it unescaped.
 For a package spec to be valid, it *must* match the regex
 `$$[([A-Za-z0-9_+-]+)(#[0-9a-z\._-]+)?(::[0-9A-Za-z_-]+)?]$$`.
 
