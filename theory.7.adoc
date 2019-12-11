@@ -257,29 +257,25 @@ even have access to the system anyway, instead being built in a chroot or a sand
 
 By default it is not defined.
 
-==== `pkg_preinstall()`
+==== `pkg_premerge()`
 
 *Only ran during installation.*
 
-This phase’s purpose is to run any link:#Package%20Triggers[package
-triggers].
+This phase's purpose is to run any commands that are required to be ran on the system itself before
+the package is merged.
 
-==== `pkg_install()`
+By default it does nothing.
+
+==== `pkg_postmerge()`
 
 *Only ran during installation.*
 
-=== Package Triggers
+This phase's purpose is to run any commands that are required to be ran on the system itself after
+the package is merged.
 
-Package triggers are scripts ran on directories or files being modified
-during `pkg_merge()`.
+(ex. Updating icon caches, displaying important information after a major package upgrade, ...)
 
-So, in order to run a script when installing a package, you’d add an
-item to `${PKG_PREINSTALL_TRIGGERS[@]}`. The contents of this variable
-must be in the format of:
-
-....
-PKG_PREINSTALL_TRIGGERS+=( "mkinitramfs:/boot:/usr/${CHOST}/lib/modules" )
-....
+By default it does nothing.
 
 === Directories
 
