@@ -251,8 +251,9 @@ undefined; at least, not by default. Failing may be useful for quality assurance
 This phase's purpose is to run the installation for the package; so, commands like
 `make install DESTDIR="${IMAGE}"`.
 
-Under no circumstances should anything in this phase touch something
-outside the build environment.
+Under no circumstances should anything in this phase touch something outside the build environment.
+The package manager will merge files from the package to the system, and the build process *may* not
+even have access to the system anyway, instead being built in a chroot or a sandbox of some sort.
 
 By default it is not defined.
 
