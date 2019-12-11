@@ -94,17 +94,15 @@ The intended scheme goes like so:
 
 === Packages
 
-Repositories *must* contain a directory named `packages`; if they do
-not, package managers *may* ignore them entirely, as there’s not much
-use to a repository with no package.
+Repositories *should* contain a directory named `packages`; if they do not, package managers *may*
+ignore them entirely, as there's not much use to a repository with no package.
 
 ==== Package specifications
 
-Package specifications (informally referred to as "specs") are strings which
-describe a package.
+Package specifications (informally referred to as "specs") are strings which describe a package.
 
-Specifications take on multiple permutations, because they are made up
-of four different parts, of which only the name is required.
+Specifications take on multiple permutations, because they are made up of four different parts, of
+which only the name is required.
 
 Given the fully-qualified spec `package#1.0::repository`...
 
@@ -132,91 +130,82 @@ be disambiguated in order to determine what packages can satisfy the
 specification given.
 
 If more than one package matches a specification, the package manager
-*may* prompt the user to be more specific.
+*may* prompt the user in some fashion to be more specific.
 
 === Format
 
-`.theory0` files and `.lib0` files are effectively just shell scripts.
-Package managers *should* avoid locking the user into any particular
-Bourne-style shell implementation; as such, the format of these files
-should adhere to shell syntax as defined in
+`theory0` files and `lib0` files are effectively just shell scripts. Package managers *should*
+avoid locking the user into any particular Bourne-style shell implementation; as such, the format
+of these files should adhere to shell syntax as defined in
 http://pubs.opengroup.org/onlinepubs/9699919799/[POSIX 2016].
 
-However, a few exceptions are made for functionality that is deemed too
-useful to be given up, and isn’t yet specified in POSIX…
+That said, a few exceptions are made for functionality that is deemed too
+useful to be given up, and isn't yet specified in POSIX...
 
 * Declaring arrays (`array=( "foo" "bar" "baz" )`)
 * Iterating through arrays (`for item in "${array[@]}";do ... done`)
 * Appending to arrays (`array+=( "xyzzy" )`)
+* Local-scope variables (`local var="value"`)
 
 == Build environment
 
-When referring to a "build environment", this document is referring to
-the literal shell environment which the shell process is running in.
-This means it consists of things such as variables, functions, and
-current working directory.
+When referring to a "build environment", this document is referring to the literal shell environment
+which the shell process is running in. This means it consists of things such as variables,
+functions, and current working directory.
 
 === Phases
 
-Everything in this section is *required* of any package manager
-implementation.
+Everything in this section is *required* of any package manager implementation.
 
-"By default" refers to a package which does not define any phases or
-import any libraries which define phases.
+"By default" refers to a package which does not define any phases or import any libraries which
+define phases.
 
-Note the difference between "not defined" and "does nothing".
-Packages *must* have each phase defined, regardless of if they have any
-function; if a phase listed here is not defined by either the package
-manager, or the package (or a library used by the package), the package
-manager *must* error out and fail, because that is an invalid package.
+Note the difference between "not defined" and "does nothing". Packages *must* have each phase
+defined, regardless of if they have any function; if a phase listed here is not defined by either
+the package manager, or the package (or a library used by the package), the package manager *must*
+error out and fail, because that is an invalid package.
 
-"Does nothing" would mean something like `pkg_init() { true; }`. "Not
-defined" would mean no definition of the function.
+"Does nothing" would mean something like `pkg_init() { true; }`. "Not defined" would mean no
+definition of the function.
+(ex. Attempting to run function that is not defined would give an unknown command error)
 
 ==== `pkg_init()`
 
-This phase is ran when a build environment is created for a package
-building session. Normally nothing is done, and this is a dummy
-function.
+This phase is ran when a build environment is created for a package building session. Normally
+nothing is done, and this is a dummy function.
 
-Examples of other defintions could be creating a custom `PATH` and
-script wrappers to be used for build systems that are stubborn to
-cooperate with cross-compilation.
+Examples of other defintions could be creating a custom `PATH` and script wrappers to be used for
+build systems that are stubborn to cooperate with cross-compilation.
 
 ==== `src_fetch()`
 
 *Only ran during installation.*
 
-This phase’s purpose is to get any sources needed to make the package
-being built. By default it downloads any unretrieved files specified in
-the link:#Downloads[`DOWNLOADS`] variable, and then verifies the files
-match the checksums specified in `DOWNLOADS`.
+This phase's purpose is to get any sources needed to make the package being built. By default it
+downloads any unretrieved files specified in the link:#Downloads[`DOWNLOADS`] metadata, and then
+verifies the files match the checksums specified in the `sha256sum` metadata.
 
 Usually you will not need to change this.
 
-Examples of other definitions could include retrieval of `git` sources,
-`hg`, `cvs`, etc.
+Examples of other definitions could include retrieval of `git` sources, `hg`, `cvs`, etc.
 
 ==== `src_unpack()`
 
 *Only ran during installation.*
 
-This phase’s purpose is to unpack any files retrived during
-`src_fetch()`. By default this means it will extract any archives
-downloaded into the link:#Build%20Environment%20Variables[`BUILD`]
-directory, and then change into `WORK`.
+This phase's purpose is to unpack any files retrived during `src_fetch()`. By default this means
+it will extract any archives downloaded into the <<Build directory>>, and then change into the
+<<Work directory>>.
 
-Examples of other definitions could include checking out `git` sources
-into `WORK`, or similar.
+Examples of other definitions could include checking out `git` sources into `WORK`, or similar.
 
 ==== `src_prepare()`
 
 *Only ran during installation.*
 
-This phase’s purpose is to prepare the package for the real build
-process; so, things which are normally done before building, like
-applying patches, generating Autotools scripts, etc. are to be done
-here.
+This phase's purpose is to prepare the package for the real build process; so, things which are
+normally done before building, like applying patches, generating Autotools scripts, etc. are to be
+done here.
 
 By default it does nothing.
 
@@ -224,9 +213,8 @@ By default it does nothing.
 
 *Only ran during installation.*
 
-This phase’s purpose is to run package configuration-related steps of
-the build process. Things like `./configure`, `cmake`, or writing build
-configuration files would be done here.
+This phase's purpose is to run package configuration-related steps of the build process. Things
+like `./configure`, `cmake`, or writing build configuration files would be done here.
 
 By default it is not defined.
 
@@ -234,7 +222,7 @@ By default it is not defined.
 
 *Only ran during installation.*
 
-This phase’s purpose is to run the compilation process for the package.
+This phase's purpose is to run the compilation process for the package.
 Things like `make`, `ninja`, etc. would be done here.
 
 By default it is not defined.
@@ -243,7 +231,7 @@ By default it is not defined.
 
 *Only ran during installation.*
 
-This phase’s purpose is to run tests for the package being built. Things
+This phase's purpose is to run tests for the package being built. Things
 like `make check`, `ctest`, `./setup.py test`, etc. are done here.
 
 By default it is not defined.
@@ -252,8 +240,8 @@ By default it is not defined.
 
 *Only ran during installation.*
 
-This phase’s purpose is to run the installation for the package; so,
-commands like `make install DESTDIR="${IMAGE}"`.
+This phase's purpose is to run the installation for the package; so, commands like
+`make install DESTDIR="${IMAGE}"`.
 
 Under no circumstances should anything in this phase touch something
 outside the build environment.
@@ -286,12 +274,10 @@ PKG_PREINSTALL_TRIGGERS+=( "mkinitramfs:/boot:/usr/${CHOST}/lib/modules" )
 
 === Directories
 
-The only requirements of the directory in which a package build is
-executed is that it is read-write accessable by the package manager, and
-that the work directory be entirely empty before any phases are ran.
+The only requirements of the directory in which a package build is executed is that it is read-write
+accessable by the package manager, and that the work directory be entirely empty before any phases
+are ran.
 
-The directories in which a build is executed are undefined. However, it
-is a good idea to use something located in a good location for temporary
-work. A directory in `/var/tmp` is a good idea; `/tmp`, not so much, as
-build directories *should* be allowed to persist for long periods of
-time.
+The directories in which a build is executed are undefined. However, it is a good idea to use
+something located in a good location for temporary work. A directory in `/var/tmp` is a good idea;
+`/tmp`, not so much, as build directories *should* be allowed to persist for long periods of time.
