@@ -50,8 +50,9 @@ Options enabled on packages; this may also include things such as environment va
 MAKEFLAGS="-j12"
 
 *           -* ruby ssl
+timezones   leaps
 toybox      MAKEFLAGS="-j1" static
-lighttpd    webdav pcre -lua MAKEFLAGS="-j -l3"
+lighttpd    MAKEFLAGS="-j -l3" webdav pcre -lua
 ----
 
 === `/etc/praxis/world`
