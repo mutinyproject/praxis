@@ -112,14 +112,14 @@ Given the fully-qualified spec `package#1.0::repository`...
 
 // If you're reading this in the .adoc, remove the `$$ and $$` from the regex to get it unescaped.
 For a package spec to be valid, it *must* match the regex
-`$$[([A-Za-z0-9_+-]+)(#[0-9a-z\._-]+)?(::[0-9A-Za-z_-]+)?]$$`.
+`$$((^[A-Za-z](?:[A-Za-z0-9_+-]*)?)(#[a-z0-9\._-]+)?(::[A-Za-z0-9_-]+)?|\*)$$`.
 
 Breaking it down:
 
-* Package name is alphanumeric, plus `_`, `+`, and `-`
+* Package name is alphanumeric, plus `_`, `+`, and `-`. It must start with an alphanumeric.
 * Package version is numeric plus `.`, `_`, `-`, and lowercase alpha
 characters. (for `r1`, etc.)
-* Repository is alphanumeric plus `_`, and `-`.
+* Repository is alphanumeric plus `_`, and `-`. It must start with an alphanumeric.
 
 All parts of a package spec are case-sensitive.
 
