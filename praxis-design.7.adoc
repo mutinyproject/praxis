@@ -54,7 +54,7 @@ toybox      MAKEFLAGS="-j1" static
 lighttpd    webdav pcre -lua MAKEFLAGS="-j -l3"
 ----
 
-=== `/etc/praxis/world-${CHOST}`
+=== `/etc/praxis/world`
 
 Packages specifically requested to be installed by the user. They were not installed as
 dependencies of other packages.
