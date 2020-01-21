@@ -1,0 +1,31 @@
+#!/bin/sh
+
+color_red=$(tput setaf 1)
+color_yellow=$(tput setaf 3)
+color_reset=$(tput sgr0)
+
+edo() {
+	stderr "+ %s\n" "$*"
+	"$@"
+}
+
+die() {
+	[ "$#" -gt 0 ] && stderr "$@"
+	#pstree "${PRAXIS_PID:-$$}"
+	exit
+}
+
+error() {
+	local msg="${1}"; shift
+	stderr "${color_red}!!${color_reset} ${msg}" "$@"
+}
+
+warning() {
+	local msg="${1}"; shift
+	stderr "${color_yellow}!?${color_reset} ${msg}" "$@"
+}
+
+stderr() {
+	printf "$@" >&2
+}
+

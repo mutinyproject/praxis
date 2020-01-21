@@ -1,0 +1,43 @@
+#!/bin/sh
+
+. "@@libdir@@"/flow.sh
+
+libraries_only=false
+packages_only=false
+
+while getopts :lp arg >/dev/null 2>&1; do
+	case "${arg}" in
+		l)
+			libraries_only=true
+			;;
+		p)
+			packages_only=true
+			;;
+		?)
+			error "unknown argument -- %s\n" "${OPTARG}"
+			die "usage: %s [-lp]\n" "${0##*/}"
+			;;
+	esac
+done
+shift $(( OPTIND - 1 ))
+
+is_empty () (
+	cd "$1"
+	set -- .[!.]* ; test -e "$1" && return 1
+	set -- ..?* ; test -e "$1" && return 1
+	set -- * ; test -e "$1" && return 1
+	return 0
+)
+
+for repo in "@@dbdir@@"/repositories/*; do
+	if "${libraries_only}"; then
+		test -d "${repo}"/libraries && ! is_empty "${repo}"/libraries || continue
+	fi
+	if "${packages_only}"; then
+		test -d "${repo}"/packages && ! is_empty "${repo}"/packages || continue
+	fi
+
+	[ -r "${repo}"/metadata/priority ] && \
+		printf '%s:%s\n' "$(<"${repo}"/metadata/priority)" "${repo##*/}"
+done | sort -t: -k 1n | cut -d: -f2-
+

@@ -1,6 +1,0 @@
-#!/bin/sh
-
-repo_list
-
-spec_disambiguate "${@}"
-spec_validate "${@}"

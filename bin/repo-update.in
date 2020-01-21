@@ -1,0 +1,51 @@
+#!/bin/sh
+
+. "@@libdir@@"/flow.sh
+. "@@libdir@@"/locations.sh
+
+dry_run=false
+while getopts :d arg >/dev/null 2>&1; do
+	case "${arg}" in
+		d)
+			dry_run=true
+			;;
+		?)
+			error "unknown argument -- %s\n" "${OPTARG}"
+			die "usage: %s [-d]\n" "${0##*/}"
+			;;
+	esac
+done
+shift $(( OPTIND - 1 ))
+
+"${dry_run}" && edo() { stderr "+ %s\n" "$*"; }
+
+"${dry_run}" || [ -w "@@dbdir@@"/repositories ] || \
+	{ error "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories" && die; }
+
+for repo in $(repo-list); do
+	if [ -x "@@dbdir@@"/repositories/"${repo}"/.git ]; then
+		edo git -C "@@dbdir@@"/repositories/"${repo}" fetch origin
+		edo git -C "@@dbdir@@"/repositories/"${repo}" reset --hard origin/master
+	else
+		warning "unsure of how to update '%s'\n" "${repo}"
+	fi
+done
+
+unset
+for repo in $(repo-list -l | sed '1!G;h;$!d'); do
+	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/libraries
+done
+
+if [ "$#" -gt 0 ]; then
+	edo s6-update-symlinks "@@dbdir@@"/libraries "$@"
+fi
+
+unset
+for repo in $(repo-list -p | sed '1!G;h;$!d'); do
+	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/packages
+done
+
+if [ "$#" -gt 0 ]; then
+	edo s6-update-symlinks "@@dbdir@@"/packages "$@"
+fi
+
