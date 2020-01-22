@@ -37,8 +37,8 @@ for repo in $(repo-list); do
 	fi
 done
 
-unset
-for repo in $(repo-list -l | sed '1!G;h;$!d'); do
+shift $#
+for repo in $(repo-list -l | tac); do
 	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/libraries
 done
 
@@ -46,8 +46,8 @@ if [ "$#" -gt 0 ]; then
 	${edo} s6-update-symlinks "@@dbdir@@"/libraries "$@"
 fi
 
-unset
-for repo in $(repo-list -p | sed '1!G;h;$!d'); do
+shift $#
+for repo in $(repo-list -p | tac); do
 	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/packages
 done
 
