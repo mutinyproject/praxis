@@ -1,0 +1,44 @@
+#!/bin/sh
+
+is_theory_dir() {
+	if ! [ -r "${1}"/libraries -a -s "${1}"/libraries ]; then # libraries does not exist
+		[ -x "${1}"/metadata -a -r "${1}"/theory -a -s "${1}"/theory ] # metadata, theory must exist
+		# if libraries does exist, metadata and theory don't have to
+		# and if libraries does exist and metadata and theory don't exist it's not a theory dir
+	fi
+	return 0
+}
+
+is_repository_dir() {
+	if [ -d "${1}" -a -x "${1}" ]; then
+		case "$(readlink -f "${1}")" in
+			"@@dbdir@@"/repositories/*)
+				return 0
+				;;
+		esac
+	fi
+	return 1
+}
+
+is_package_dir() {
+	if [ -d "${1}" -a -x "${1}" ]; then
+		case "$(readlink -f "${1}")" in
+			"@@dbdir@@"/repositories/*/packages/*)
+				return 0
+				;;
+		esac
+	fi
+	return 1
+}
+
+is_library_dir() {
+	if [ -d "${1}" -a -x "${1}" ]; then
+		case "$(readlink -f "${1}")" in
+			"@@dbdir@@"/repositories/*/libraries/*)
+				return 0
+				;;
+		esac
+	fi
+	return 1
+}
+

@@ -1,0 +1,51 @@
+#!/bin/sh
+
+. "@@libdir@@"/flow.sh
+. "@@libdir@@"/theory.sh
+. "@@libdir@@"/text.sh
+
+recurse=false
+while getopts :r arg >/dev/null 2>&1; do
+	case "${arg}" in
+		r)
+			recurse=true
+			;;
+		?)
+			error "unknown argument -- %s\n" "${OPTARG}"
+			die "usage: %s [-r] <theory ...>\n" "${0##*/}"
+			;;
+	esac
+done
+shift $(( OPTIND - 1 ))
+
+while [ "$#" -gt 0 ]; do
+	theory=$(readlink -f "${1}")
+	is_theory_dir "${theory}" || error -d "'%s' is not a directory containing a theory\n" "${theory}"
+
+	if is_package_dir "${theory}"; then
+		PN="${theory##*/}"
+		PV="${PN#*#}"; PN="${PN%#*}"
+		PNV="${PN}-${PV}"
+
+		printf '%s="%s"\n' \
+			PN "${PN}" \
+			PV "${PV}" \
+			PNV "${PNV}"
+	fi
+
+	if "${recurse}" && [ -r "${1}"/libraries ]; then
+		backslash "${1}"/libraries | while read -r library arguments; do
+			theory-metadata -r "@@dbdir@@"/libraries/"${library}"
+		done
+	fi
+
+	if test -x "${1}"/metadata; then
+		for v in "${1}"/metadata/*; do
+			test -f "${v}" || break
+			printf '%s="%s"\n' "${v##*/}" "$(cat "${v}" | s6-quote-filter -u)"
+		done
+	fi
+
+	shift
+done
+
