@@ -2,12 +2,12 @@
 
 is_theory_dir() {
 	[ -d "${1}" ] || return 1
-	if ! [ -r "${1}"/libraries -a -s "${1}"/libraries ]; then # libraries does not exist
-		[ -x "${1}"/metadata -a -r "${1}"/theory -a -s "${1}"/theory ] # metadata, theory must exist
-		# if libraries does exist, metadata and theory don't have to
-		# and if libraries does exist and metadata and theory don't exist it's not a theory dir
+	if [ -d "${1}"/libraries ] || [ -d "${1}"/metadata -a -e "${1}"/theory -a -s "${1}"/theory ] || \
+		{ [ -e "${1}"/theory -a -s "${1}"/theory ] && is_library_dir "${1}"; }; then
+		return 0
 	fi
-	return 0
+
+	return 1
 }
 
 is_repository_dir() {
