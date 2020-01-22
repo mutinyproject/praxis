@@ -5,8 +5,11 @@ color_yellow=$(tput setaf 3)
 color_reset=$(tput sgr0)
 
 edo() {
+	local dry_run=false arg
+	[ "$1" = -d ] && local dry_run=true && shift
+
 	stderr "+ %s\n" "$*"
-	"$@"
+	"${dry_run}" || "$@"
 }
 
 die() {
