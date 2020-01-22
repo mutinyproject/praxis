@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . "@@libdir@@"/flow.sh
-. "@@libdir@@"/locations.sh
 
 dry_run=false
 while getopts :d arg >/dev/null 2>&1; do
