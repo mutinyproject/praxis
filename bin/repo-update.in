@@ -3,28 +3,35 @@
 . "@@libdir@@"/flow.sh
 
 dry_run=false
-while getopts :d arg >/dev/null 2>&1; do
+verbose=false
+while getopts :dv arg >/dev/null 2>&1; do
 	case "${arg}" in
 		d)
 			dry_run=true
 			;;
+		v)
+			verbose=true
+			;;
 		?)
 			error "unknown argument -- %s\n" "${OPTARG}"
-			die "usage: %s [-d]\n" "${0##*/}"
+			die "usage: %s [-dv]\n" "${0##*/}"
 			;;
 	esac
 done
 shift $(( OPTIND - 1 ))
 
-"${dry_run}" && edo() { stderr "+ %s\n" "$*"; }
+edo=
 
+"${verbose}" && edo="edo"
+"${dry_run}" && edo="edo -d"
 "${dry_run}" || [ -w "@@dbdir@@"/repositories ] || \
-	{ error "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories" && die; }
+	error -d "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
+"${verbose}" || verbose=
 
 for repo in $(repo-list); do
 	if [ -x "@@dbdir@@"/repositories/"${repo}"/.git ]; then
-		edo git -C "@@dbdir@@"/repositories/"${repo}" fetch origin
-		edo git -C "@@dbdir@@"/repositories/"${repo}" reset --hard origin/master
+		${edo} git -C "@@dbdir@@"/repositories/"${repo}" fetch ${verbose:+-v} origin
+		${edo} git -C "@@dbdir@@"/repositories/"${repo}" reset --hard origin/master
 	else
 		warning "unsure of how to update '%s'\n" "${repo}"
 	fi
@@ -36,7 +43,7 @@ for repo in $(repo-list -l | sed '1!G;h;$!d'); do
 done
 
 if [ "$#" -gt 0 ]; then
-	edo s6-update-symlinks "@@dbdir@@"/libraries "$@"
+	${edo} s6-update-symlinks "@@dbdir@@"/libraries "$@"
 fi
 
 unset
@@ -45,6 +52,6 @@ for repo in $(repo-list -p | sed '1!G;h;$!d'); do
 done
 
 if [ "$#" -gt 0 ]; then
-	edo s6-update-symlinks "@@dbdir@@"/packages "$@"
+	${edo} s6-update-symlinks "@@dbdir@@"/packages "$@"
 fi
 
