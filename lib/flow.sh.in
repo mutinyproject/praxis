@@ -19,8 +19,17 @@ die() {
 }
 
 error() {
+	local die=false
+	case "${1}" in
+		-d|--die)
+			die=true
+			shift
+			;;
+	esac
+
 	local msg="${1}"; shift
 	stderr "${color_red}!!${color_reset} ${msg}" "$@"
+	"${die}" && die
 }
 
 warning() {
