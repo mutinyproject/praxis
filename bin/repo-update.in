@@ -2,7 +2,7 @@
 
 . "@@libdir@@"/flow.sh
 
-usage() { die "usage: %s [-cdv]\n" "${0##*/}"; }
+usage() { die "usage: %s [-cdv] [REPOSITORY...]\n" "${0##*/}"; }
 
 changes=false
 dry_run=false
@@ -34,8 +34,12 @@ edo=
 	error -d "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
 "${verbose}" || verbose=
 
-for repo in $(repo-list); do
+[ $# -gt 0 ] || set -- $(repo-list)
+
+for repo in "$@"; do
 	repo_loc="@@dbdir@@"/repositories/"${repo}"
+	[ -d "${repo_loc}" ] || error -d "'%s' is not a repository\n" "${repo_loc}"
+
 	if [ -x "${repo_loc}"/.git ]; then
 		repo_branch=$(git rev-parse --abbrev-ref HEAD)
 		${edo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
