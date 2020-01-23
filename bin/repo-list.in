@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . "@@libdir@@"/flow.sh
+. "@@libdir@@"/file.sh
 
 libraries_only=false
 packages_only=false
@@ -22,14 +23,6 @@ while getopts :lp arg >/dev/null 2>&1; do
 	esac
 done
 shift $(( OPTIND - 1 ))
-
-is_empty () (
-	cd "$1"
-	set -- .[!.]* ; test -e "$1" && return 1
-	set -- ..?* ; test -e "$1" && return 1
-	set -- * ; test -e "$1" && return 1
-	return 0
-)
 
 for repo in "@@dbdir@@"/repositories/*; do
 	if "${libraries_only}"; then
