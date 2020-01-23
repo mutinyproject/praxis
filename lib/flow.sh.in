@@ -1,8 +1,10 @@
 #!/bin/sh
 
-color_red=$(tput setaf 1)
-color_yellow=$(tput setaf 3)
-color_reset=$(tput sgr0)
+if [ -z "${NO_COLOR}" ]; then
+	color_red=$(tput setaf 1)
+	color_yellow=$(tput setaf 3)
+	color_reset=$(tput sgr0)
+fi
 
 edo() {
 	local dry_run=false arg
