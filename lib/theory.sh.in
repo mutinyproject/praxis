@@ -1,7 +1,7 @@
 #!/bin/sh
 
 is_theory_dir() {
-	[ -d "${1}" ] || return 1
+	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
 	if [ -d "${1}"/libraries ] || [ -d "${1}"/metadata -a -e "${1}"/theory -a -s "${1}"/theory ] || \
 		{ [ -e "${1}"/theory -a -s "${1}"/theory ] && is_library_dir "${1}"; }; then
 		return 0
@@ -11,7 +11,7 @@ is_theory_dir() {
 }
 
 is_repository_dir() {
-	[ -d "${1}" ] || return 1
+	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
 	if [ -d "${1}" -a -x "${1}" ]; then
 		case "$(readlink -f "${1}")" in
 			"@@dbdir@@"/repositories/*)
@@ -23,7 +23,7 @@ is_repository_dir() {
 }
 
 is_package_dir() {
-	[ -d "${1}" ] || return 1
+	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
 	if [ -d "${1}" -a -x "${1}" ]; then
 		case "$(readlink -f "${1}")" in
 			"@@dbdir@@"/repositories/*/packages/*)
@@ -35,6 +35,7 @@ is_package_dir() {
 }
 
 is_library_dir() {
+	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
 	if [ -d "${1}" -a -x "${1}" ]; then
 		case "$(readlink -f "${1}")" in
 			"@@dbdir@@"/repositories/*/libraries/*)
