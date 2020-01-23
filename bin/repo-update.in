@@ -2,6 +2,8 @@
 
 . "@@libdir@@"/flow.sh
 
+usage() { die "usage: %s [-cdv]\n" "${0##*/}"; }
+
 dry_run=false
 verbose=false
 while getopts :dv arg >/dev/null 2>&1; do
@@ -14,7 +16,7 @@ while getopts :dv arg >/dev/null 2>&1; do
 			;;
 		?)
 			error "unknown argument -- %s\n" "${OPTARG}"
-			die "usage: %s [-dv]\n" "${0##*/}"
+			usage
 			;;
 	esac
 done
