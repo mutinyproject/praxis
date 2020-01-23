@@ -4,7 +4,7 @@
 . "@@libdir@@"/theory.sh
 . "@@libdir@@"/text.sh
 
-usage() { die "usage: %s [-r] <theory ...>\n" "${0##*/}"; }
+usage() { die "usage: %s [-r] THEORY...\n" "${0##*/}"; }
 
 recurse=false
 while getopts :r arg >/dev/null 2>&1; do
