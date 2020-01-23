@@ -4,10 +4,14 @@
 
 usage() { die "usage: %s [-cdv]\n" "${0##*/}"; }
 
+changes=false
 dry_run=false
 verbose=false
-while getopts :dv arg >/dev/null 2>&1; do
+while getopts :cdv arg >/dev/null 2>&1; do
 	case "${arg}" in
+		c)
+			changes=true
+			;;
 		d)
 			dry_run=true
 			;;
@@ -31,9 +35,23 @@ edo=
 "${verbose}" || verbose=
 
 for repo in $(repo-list); do
-	if [ -x "@@dbdir@@"/repositories/"${repo}"/.git ]; then
-		${edo} git -C "@@dbdir@@"/repositories/"${repo}" fetch ${verbose:+-v} origin
-		${edo} git -C "@@dbdir@@"/repositories/"${repo}" reset --hard origin/master
+	repo_loc="@@dbdir@@"/repositories/"${repo}"
+	if [ -x "${repo_loc}"/.git ]; then
+		repo_branch=$(git rev-parse --abbrev-ref HEAD)
+		${edo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
+
+		if "${changes}" && [ $(git -C "${repo_loc}" log --oneline ..@{u} | wc -l) -gt 0 ]; then
+			[ -n "${NO_COLOR}" ] && NO_COLOR=--color=never
+
+			before_date=$(git -C "${repo_loc}" show -s --format=%cd --date=human-local HEAD)
+			printf 'Changes in %s since %s:\n' "${repo}" "${before_date}"
+			PAGER=cat ${edo} git -C "${repo_loc}" log \
+				--reverse ${NO_COLOR:---color=auto} \
+				--format=$'\t%C(yellow)%h%C(reset) %s (%aN <%aE>)' \
+				..@{u}
+		fi
+
+		${edo} git -C "${repo_loc}" reset --hard -q origin/"${repo_branch}"
 	else
 		warning "unsure of how to update '%s'\n" "${repo}"
 	fi
