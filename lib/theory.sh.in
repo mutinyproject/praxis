@@ -1,9 +1,12 @@
 #!/bin/sh
 
+. "@@libdir@@"/file.sh
+
+# at a bare minimum, a directory is a theory directory if it contains a theory or a library.
 is_theory_dir() {
 	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
-	if [ -d "${1}"/libraries ] || [ -d "${1}"/metadata -a -e "${1}"/theory -a -s "${1}"/theory ] || \
-		{ [ -e "${1}"/theory -a -s "${1}"/theory ] && is_library_dir "${1}"; }; then
+
+	if [ -e "${1}"/theory -a -s "${1}"/theory ] || [ -e "${1}"/libraries -a -s "${1}"/libraries ]; then
 		return 0
 	fi
 
