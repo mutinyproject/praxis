@@ -2,11 +2,11 @@
 
 . "@@libdir@@"/file.sh
 
-# at a bare minimum, a directory is a theory package/library directory if it contains a theory or a library.
+# at a bare minimum, a directory is a theory package/library directory if it contains an action or a library.
 is_theory_dir() {
 	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
 
-	{ [ -r "${1}"/theory -a -s "${1}"/theory ] || \
+	{ [ -r "${1}"/action -a -s "${1}"/action ] || \
 		[ -r "${1}"/libraries -a -s "${1}"/libraries ]; } &&
 		return 0
 
