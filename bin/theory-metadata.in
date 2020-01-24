@@ -23,8 +23,8 @@ shift $(( OPTIND - 1 ))
 [ "$#" -gt 0 ] || usage
 
 while [ "$#" -gt 0 ]; do
+	is_theory_dir "${1}" || error -d "'%s' is not a directory containing a package or library\n" "${1}"
 	theory=$(readlink -f "${1}")
-	is_theory_dir "${theory}" || error -d "'%s' is not a directory containing a theory\n" "${theory}"
 
 	if is_package_dir "${theory}"; then
 		PN="${theory##*/}"
