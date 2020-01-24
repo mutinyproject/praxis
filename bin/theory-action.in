@@ -28,12 +28,12 @@ while [ "$#" -gt 0 ]; do
 
 	if "${recurse}" && [ -r "${1}"/libraries ]; then
 		backslash "${1}"/libraries | while read -r library arguments; do
-			theory-theory -r "@@dbdir@@"/libraries/"${library}"
+			theory-action -r "@@dbdir@@"/libraries/"${library}"
 		done
 	fi
 
-	if test -r "${1}"/theory -a -s "${1}"/theory && \
-		! { sh -n "${1}"/theory && cat "${1}"/theory; }; then
+	if test -r "${1}"/action -a -s "${1}"/action && \
+		! { sh -n "${1}"/action && cat "${1}"/action  }; then
 		exit
 	fi
 
