@@ -15,37 +15,26 @@ is_theory_dir() {
 
 is_repository_dir() {
 	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
-	if [ -d "${1}" -a -x "${1}" ]; then
-		case "$(readlink -f "${1}")" in
-			"@@dbdir@@"/repositories/*)
-				return 0
-				;;
-		esac
-	fi
+
+	[ -d "${1}"/packages -a -d "${1}"/metadata ] && \
+		[ -d "${1}"/libraries -a -d "${1}"/metadata ] &&
+		return 0
+
 	return 1
 }
 
 is_package_dir() {
 	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
-	if [ -d "${1}" -a -x "${1}" ]; then
-		case "$(readlink -f "${1}")" in
-			"@@dbdir@@"/repositories/*/packages/*)
-				return 0
-				;;
-		esac
-	fi
+
+	match -E "^[A-Za-z][A-Za-z0-9_+-]*#[a-z0-9\._-]+$" "${1##*/}" && \
+		is_theory_dir "${1}" && return 0
+
 	return 1
 }
 
 is_library_dir() {
 	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
-	if [ -d "${1}" -a -x "${1}" ]; then
-		case "$(readlink -f "${1}")" in
-			"@@dbdir@@"/repositories/*/libraries/*)
-				return 0
-				;;
-		esac
-	fi
+	! is_package_dir "${1}" && is_theory_dir "${1}" && return 0
 	return 1
 }
 
