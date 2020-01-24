@@ -1,0 +1,14 @@
+= `praxis`
+
+A package manager for https://mutiny.zone[Mutiny]'s package API, `theory`.
+
+Starting from the bottom-up, `praxis` aims to be composed of multiple small utilities that do one
+thing, so as to ease frontend development and more importantly, to make the surface area for
+parsing-related issues very small.
+
+No code evaluation is used at any point. All code is generated purely by following hierarchies of
+inheritance for actions (build scripts) and metadata.
+Concepts like https://skarnet.org/software/s6/s6-envdir.html[envdirs] are used to additionally ease
+the amount of parsing that must be done to files in order to construct metadata for packages,
+repositories, and libraries.
+
