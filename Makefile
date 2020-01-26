@@ -8,6 +8,7 @@ localstatedir ?= $(prefix)/var
 
 libdir := $(libdir)/$(name)
 
+builddir := $(localstatedir)/tmp/$(name)/build
 dbdir := $(localstatedir)/db/$(name)
 
 BINS := $(patsubst %.in, %, $(wildcard bin/*.in))
@@ -16,7 +17,8 @@ LIBS := $(patsubst %.in, %, $(wildcard lib/*.in))
 INSTALLS := \
 	$(addprefix $(DESTDIR)$(bindir)/,$(BINS:bin/%=%)) \
 	$(addprefix $(DESTDIR)$(libdir)/,$(LIBS:lib/%=%)) \
-	$(dbdir)/
+	$(dbdir)/ \
+	$(builddir)/
 
 .PHONY: all
 all: $(BINS) $(LIBS)
@@ -43,6 +45,7 @@ bin/%: bin/%.in
 		-e "s|@@libdir@@|$(libdir)|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
 		-e "s|@@dbdir@@|$(dbdir)|g" \
+		-e "s|@@builddir@@|$(builddir)|g" \
 		$< > $@
 	chmod +x $@
 
@@ -55,6 +58,7 @@ lib/%: lib/%.in
 		-e "s|@@libdir@@|$(libdir)|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
 		-e "s|@@dbdir@@|$(dbdir)|g" \
+		-e "s|@@builddir@@|$(builddir)|g" \
 		$< > $@
 
 $(DESTDIR)$(bindir)/%: bin/%
@@ -64,4 +68,5 @@ $(DESTDIR)$(libdir)/%: lib/%
 	install -D -m 0644 $< $@
 
 $(DESTDIR)$(dbdir)/:
-	mkdir -p $(DESTDIR)$(dbdir)
+$(DESTDIR)$(builddir)/:
+	mkdir -p $@
