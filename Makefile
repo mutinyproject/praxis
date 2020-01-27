@@ -13,6 +13,8 @@ dbdir := $(localstatedir)/db/$(name)
 
 BINS := $(patsubst %.in, %, $(wildcard bin/*.in))
 LIBS := $(patsubst %.in, %, $(wildcard lib/*.in))
+MANS := $(patsubst %.adoc, %, $(wildcard man/*.adoc))
+HTMLS := $(patsubst %.adoc, %.html, $(wildcard man/*.adoc))
 
 INSTALLS := \
 	$(addprefix $(DESTDIR)$(bindir)/,$(BINS:bin/%=%)) \
@@ -21,11 +23,11 @@ INSTALLS := \
 	$(builddir)/
 
 .PHONY: all
-all: $(BINS) $(LIBS)
+all: bin lib man html
 
 .PHONY: clean
 clean:
-	rm -f $(BINS) $(LIBS)
+	rm -f $(BINS) $(LIBS) $(MANS) $(HTMLS)
 
 .PHONY: install
 install: $(INSTALLS)
@@ -35,6 +37,12 @@ bin: $(BINS)
 
 .PHONY: lib
 lib: $(LIBS)
+
+.PHONY: man
+man: $(MANS)
+
+.PHONY: html
+html: $(HTMLS)
 
 bin/%: bin/%.in
 	sed \
@@ -60,6 +68,14 @@ lib/%: lib/%.in
 		-e "s|@@dbdir@@|$(dbdir)|g" \
 		-e "s|@@builddir@@|$(builddir)|g" \
 		$< > $@
+
+.DELETE_ON_ERROR: man/%
+man/%.html: man/%.adoc
+	asciidoctor --failure-level=WARNING -b html5 -B $(PWD) -o $@ $<
+
+.DELETE_ON_ERROR: man/%
+man/%: man/%.adoc
+	asciidoctor --failure-level=WARNING -b manpage -B $(PWD) -d manpage -o $@ $<
 
 $(DESTDIR)$(bindir)/%: bin/%
 	install -D $< $@

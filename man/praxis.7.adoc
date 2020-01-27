@@ -1,0 +1,44 @@
+= praxis(7)
+:description: The package manager for Mutiny.
+:manmanual: Mutiny manual
+
+== Name
+
+ifdef::backend-html5[]
+praxis - a package manager for https://mutiny.zone[Mutiny]'s package API, `theory`
+endif::[]
+ifdef::backend-manpage[]
+praxis - a package manager for Mutiny's package API, theory
+endif::[]
+
+== Philosophy
+
+Starting from the bottom-up, `praxis` aims to be composed of multiple small utilities that do one
+thing, so as to ease frontend development and more importantly, to make the surface area for
+parsing-related issues very small. With this design in mind, `praxis` can be fast and very compact,
+while providing a lot of useful functionality for developers, metadata consumers, and users.
+
+No code evaluation is used at any point. All code is generated purely by following hierarchies of
+inheritance for actions (build scripts) and metadata.
+Concepts like https://skarnet.org/software/s6/s6-envdir.html[envdirs] are used to additionally ease
+the amount of parsing that must be done to files in order to construct metadata for packages,
+repositories, and libraries.
+
+Furthermore, another goal is ensuring that it should be possible to get metadata from packages
+without having to call out to a shell running arbitrary code or duplicate metadata. This has tended
+to be a problem for other source-based package formats, such as the Arch Linux AUR, Exherbo's
+exheres-0, and Gentoo's EAPI.
+
+== Bugs
+
+There's an IRC channel at irc://irc.freenode.net/#mutiny. Please don't hesitate to message if you
+have questions, bug reports, etc.
+
+== License
+
+*praxis* is in the public domain.
+
+To the extent possible under law, Kylie McClain <kylie@somas.is> has waived all copyright and
+related or neighboring rights to this work.
+
+http://creativecommons.org/publicdomain/zero/1.0/
