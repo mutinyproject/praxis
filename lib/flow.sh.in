@@ -38,7 +38,7 @@ die() {
 error() {
 	local die=false
 	case "${1}" in
-		-d|--die)
+		-d)
 			die=true
 			shift
 			;;
