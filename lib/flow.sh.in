@@ -7,11 +7,26 @@ if [ -z "${NO_COLOR}" ]; then
 fi
 
 edo() {
-	local dry_run=false arg
-	[ "$1" = -d ] && local dry_run=true && shift
+	local dry_run=false die=false arg
+	while [ $# -gt 0 ] && [ "${1:0:1}" = '-' ]; do
+		case "$1" in
+			-n)
+				local dry_run=true
+				;;
+			-d)
+				local die=true
+				;;
+		esac
+		shift
+	done
 
 	stderr "+ %s\n" "$*"
-	"${dry_run}" || "$@"
+	if ! "${dry_run}"; then
+		if ! "$@" && "${die}"; then
+			err_code="$?"
+			"${die}" && error -d "command \`%s\` exited with %s\n" "$*" "$?"
+		fi
+	fi
 }
 
 die() {
