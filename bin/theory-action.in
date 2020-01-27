@@ -47,7 +47,7 @@ while [ "$#" -gt 0 ]; do
 		sh -n "${1}"/action || error -d "syntax error in '%s', dying\n" "${1}/action"
 		cat "${1}"/action
 	else
-		exit
+		exit 0
 	fi
 
 	shift
