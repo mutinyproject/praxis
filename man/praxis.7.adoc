@@ -5,7 +5,7 @@
 == Name
 
 ifdef::backend-html5[]
-praxis - a package manager for https://mutiny.zone[Mutiny]'s package API, `theory`
+*praxis* - a package manager for https://mutiny.zone[Mutiny]'s package API, `theory`
 endif::[]
 ifdef::backend-manpage[]
 praxis - a package manager for Mutiny's package API, theory
