@@ -7,7 +7,11 @@ default_src_fetch() {
 
 	while [ $# -gt 0 ]; do
 		local output="${FETCHDIR}"/"$(basename "$1")"
-		edo curl -# -L -C - -o "${output}".part "$1" && edo mv "${output}".part "${output}"
+		if ! [ -f "${output}" ]; then
+			edo curl -# -L -C - -o "${output}".part "$1"
+			edo mv "${output}".part "${output}"
+		fi
+
 		shift
 	done
 }
