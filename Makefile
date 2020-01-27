@@ -10,17 +10,16 @@ libdir := $(libdir)/$(name)
 
 builddir := $(localstatedir)/tmp/$(name)/build
 dbdir := $(localstatedir)/db/$(name)
+cachedir := $(localstatedir)/cache/$(name)
 
-BINS := $(patsubst %.in, %, $(wildcard bin/*.in))
-LIBS := $(patsubst %.in, %, $(wildcard lib/*.in))
+BINS := $(patsubst %.in, %, $(shell find bin/ -name '*.in'))
+LIBS := $(patsubst %.in, %, $(shell find lib/ -name '*.in'))
 MANS := $(patsubst %.adoc, %, $(wildcard man/*.adoc))
 HTMLS := $(patsubst %.adoc, %.html, $(wildcard man/*.adoc))
 
 INSTALLS := \
 	$(addprefix $(DESTDIR)$(bindir)/,$(BINS:bin/%=%)) \
-	$(addprefix $(DESTDIR)$(libdir)/,$(LIBS:lib/%=%)) \
-	$(dbdir)/ \
-	$(builddir)/
+	$(addprefix $(DESTDIR)$(libdir)/,$(LIBS:lib/%=%))
 
 .PHONY: all
 all: bin lib man html
@@ -31,6 +30,10 @@ clean:
 
 .PHONY: install
 install: $(INSTALLS)
+	mkdir -p $(DESTDIR)$(builddir)
+	mkdir -p $(DESTDIR)$(cachedir)
+	mkdir -p $(DESTDIR)$(cachedir)/distfiles
+	mkdir -p $(DESTDIR)$(dbdir)
 
 .PHONY: bin
 bin: $(BINS)
@@ -52,8 +55,9 @@ bin/%: bin/%.in
 		-e "s|@@bindir@@|$(bindir)|g" \
 		-e "s|@@libdir@@|$(libdir)|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@dbdir@@|$(dbdir)|g" \
 		-e "s|@@builddir@@|$(builddir)|g" \
+		-e "s|@@cachedir@@|$(cachedir)|g" \
+		-e "s|@@dbdir@@|$(dbdir)|g" \
 		$< > $@
 	chmod +x $@
 
@@ -65,8 +69,9 @@ lib/%: lib/%.in
 		-e "s|@@bindir@@|$(bindir)|g" \
 		-e "s|@@libdir@@|$(libdir)|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@dbdir@@|$(dbdir)|g" \
 		-e "s|@@builddir@@|$(builddir)|g" \
+		-e "s|@@cachedir@@|$(cachedir)|g" \
+		-e "s|@@dbdir@@|$(dbdir)|g" \
 		$< > $@
 
 .DELETE_ON_ERROR: man/%
@@ -83,6 +88,3 @@ $(DESTDIR)$(bindir)/%: bin/%
 $(DESTDIR)$(libdir)/%: lib/%
 	install -D -m 0644 $< $@
 
-$(DESTDIR)$(dbdir)/:
-$(DESTDIR)$(builddir)/:
-	mkdir -p $@

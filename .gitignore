@@ -1,4 +1,6 @@
 bin/*
-lib/*
+lib/public/*
 man/*.html
-!**/*.in
+**.sh
+
+!*.in
