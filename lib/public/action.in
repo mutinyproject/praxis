@@ -1,15 +1,31 @@
 #!/bin/sh
 
-src_fetch() {
+default_pkg_init() { :; }
+
+default_src_fetch() {
 	OLDIFS="${IFS}"; IFS=$'\n'; set -- "${SOURCES}"; IFS="${OLDIFS}"; unset OLDIFS
 
 	while [ $# -gt 0 ]; do
 		local output="${FETCHDIR}"/"$(basename "$1")"
-		edo curl -# -L -C - -o "${output}".part "$1" && edo mv "${output}".part "${output}"
+		edo -d curl -# -L -C - -o "${output}".part "$1" && edo mv "${output}".part "${output}"
 		shift
 	done
 }
 
-src_unpack() {
-	:
-}
+default_src_unpack() { :; }
+default_src_prepare() { :; }
+# purposefully undefined: default_src_configure()
+# purposefully undefined: default_src_test()
+# purposefully undefined: default_src_install()
+default_pkg_premerge() { :; }
+default_pkg_postmerge() { :; }
+
+pkg_init() { default_pkg_init "$@"; }
+src_fetch() { default_src_fetch "$@"; }
+src_unpack() { default_src_unpack "$@"; }
+src_prepare() { default_src_prepare "$@"; }
+src_configure() { error -d "phase 'src_configure' is not defined!"; }
+src_test() { error -d "phase 'src_test' is not defined!"; }
+src_install() { error -d "phase 'src_install' is not defined!"; }
+pkg_premerge() { default_pkg_premerge "$@"; }
+pkg_postmerge() { default_pkg_postmerge "$@"; }
