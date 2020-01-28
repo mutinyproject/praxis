@@ -41,7 +41,7 @@ for repo in "$@"; do
 	[ -d "${repo_loc}" ] || error -d "'%s' is not a repository\n" "${repo_loc}"
 
 	if [ -x "${repo_loc}"/.git ]; then
-		repo_branch=$(git rev-parse --abbrev-ref HEAD)
+		repo_branch=$(git -C "${repo_loc}" rev-parse --abbrev-ref HEAD)
 		${edo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
 
 		if "${changes}" && [ $(git -C "${repo_loc}" log --oneline ..@{u} | wc -l) -gt 0 ]; then
