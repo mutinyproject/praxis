@@ -34,6 +34,7 @@ install: $(INSTALLS)
 	mkdir -p $(DESTDIR)$(cachedir)
 	mkdir -p $(DESTDIR)$(cachedir)/distfiles
 	mkdir -p $(DESTDIR)$(dbdir)
+	mkdir -p $(DESTDIR)$(dbdir)/repositories
 
 .PHONY: bin
 bin: $(BINS)
