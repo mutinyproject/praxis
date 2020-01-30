@@ -6,7 +6,7 @@
 libraries_only=false
 packages_only=false
 
-usage() { die "usage: %s [-lp]\n" "${0##*/}"; }
+usage() { pdie "usage: %s [-lp]\n" "${0##*/}"; }
 
 while getopts :lp arg >/dev/null 2>&1; do
 	case "${arg}" in
@@ -17,7 +17,7 @@ while getopts :lp arg >/dev/null 2>&1; do
 			packages_only=true
 			;;
 		?)
-			error "unknown argument -- %s\n" "${OPTARG}"
+			perror "unknown argument -- %s\n" "${OPTARG}"
 			usage
 			;;
 	esac

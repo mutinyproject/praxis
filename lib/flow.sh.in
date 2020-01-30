@@ -6,7 +6,7 @@ if [ -z "${NO_COLOR}" ]; then
 	color_reset=$(tput sgr0)
 fi
 
-edo() {
+pdo() {
 	local dry_run=false die=true arg
 	while [ $# -gt 0 ] && [ "${1:0:1}" = '-' ]; do
 		case "$1" in
@@ -22,17 +22,16 @@ edo() {
 
 	stderr "+ %s\n" "$*"
 	if ! "${dry_run}"; then
-		"$@" || { err_code=$?; "${die}" && error -d "command \`%s\` exited with %s\n" "$*" "${err_code}"; }
+		"$@" || { err_code=$?; "${die}" && perror -d "command \`%s\` exited with %s\n" "$*" "${err_code}"; }
 	fi
 }
 
-die() {
-	[ "$#" -gt 0 ] && stderr "$@"
-	#pstree "${PRAXIS_PID:-$$}"
+pdie() {
+	[ "$#" -gt 0 ] && pstderr "$@"
 	exit
 }
 
-error() {
+perror() {
 	local die=false
 	case "${1}" in
 		-d)
@@ -42,16 +41,16 @@ error() {
 	esac
 
 	local msg="${1}"; shift
-	stderr "${color_red}!!${color_reset} ${msg}" "$@"
+	pstderr "${color_red}!!${color_reset} ${msg}" "$@"
 	"${die}" && die
 }
 
-warning() {
+pwarning() {
 	local msg="${1}"; shift
-	stderr "${color_yellow}!?${color_reset} ${msg}" "$@"
+	pstderr "${color_yellow}!?${color_reset} ${msg}" "$@"
 }
 
-stderr() {
+pstderr() {
 	printf "$@" >&2
 }
 

@@ -4,7 +4,7 @@
 
 # at a bare minimum, a directory is a theory package/library directory if it contains an action or a library.
 is_theory_dir() {
-	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
+	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
 	{ [ -r "${1}"/action -a -s "${1}"/action ] || \
 		[ -r "${1}"/libraries -a -s "${1}"/libraries ]; } &&
@@ -14,7 +14,7 @@ is_theory_dir() {
 }
 
 is_repository_dir() {
-	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
+	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
 	[ -d "${1}"/packages -a -d "${1}"/metadata ] && \
 		[ -d "${1}"/libraries -a -d "${1}"/metadata ] &&
@@ -24,7 +24,7 @@ is_repository_dir() {
 }
 
 is_package_dir() {
-	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
+	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
 	match -E "^[A-Za-z][A-Za-z0-9_+-]*#[a-z0-9\._-]+$" "$(basename "${1}")" && \
 		is_theory_dir "${1}" && return 0
@@ -33,7 +33,7 @@ is_package_dir() {
 }
 
 is_library_dir() {
-	[ -d "${1}" ] || error -d "'%s' is not a directory\n" "${1}"
+	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 	! is_package_dir "${1}" && is_theory_dir "${1}" && return 0
 	return 1
 }

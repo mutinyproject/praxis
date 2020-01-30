@@ -1,4 +1,15 @@
 #!/bin/sh
+eerror() {
+	pstderr "${color_red}!!${color_reset} %s\n" "$@"
+}
+
+ewarning() {
+	pstderr "${color_yellow}!?${color_reset} ${msg}" "$@"
+}
+
+einfo() {
+	printf "${color_green}..${color_reset} %s\n" "$@"
+}
 
 default_pkg_init() { :; }
 
@@ -28,8 +39,8 @@ pkg_init() { default_pkg_init "$@"; }
 src_fetch() { default_src_fetch "$@"; }
 src_unpack() { default_src_unpack "$@"; }
 src_prepare() { default_src_prepare "$@"; }
-src_configure() { error -d "phase 'src_configure' is not defined!"; }
-src_test() { error -d "phase 'src_test' is not defined!"; }
-src_install() { error -d "phase 'src_install' is not defined!"; }
+src_configure() { eerror -d "phase 'src_configure' is not defined!\n"; }
+src_test() { eerror -d "phase 'src_test' is not defined!\n"; }
+src_install() { eerror -d "phase 'src_install' is not defined!\n"; }
 pkg_premerge() { default_pkg_premerge "$@"; }
 pkg_postmerge() { default_pkg_postmerge "$@"; }
