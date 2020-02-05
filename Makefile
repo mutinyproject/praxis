@@ -36,6 +36,10 @@ install: $(INSTALLS)
 	mkdir -p $(DESTDIR)$(dbdir)
 	mkdir -p $(DESTDIR)$(dbdir)/repositories
 
+.PHONY: lint
+lint:
+	printf '%s\n' $(patsubst %,%.in,$(BINS)) $(patsubst %,%.in,$(LIBS)) | xargs shellcheck
+
 .PHONY: bin
 bin: $(BINS)
 

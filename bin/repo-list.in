@@ -25,14 +25,10 @@ done
 shift $(( OPTIND - 1 ))
 
 for repo in "@@dbdir@@"/repositories/*; do
-	if "${libraries_only}"; then
-		test -d "${repo}"/libraries && ! is_empty "${repo}"/libraries || continue
-	fi
-	if "${packages_only}"; then
-		test -d "${repo}"/packages && ! is_empty "${repo}"/packages || continue
-	fi
+	"${libraries_only}" && is_empty "${repo}"/libraries && continue
+	"${packages_only}" && is_empty "${repo}"/packages && continue
 
 	[ -r "${repo}"/metadata/priority ] && \
-		printf '%s:%s\n' "$(<"${repo}"/metadata/priority)" "${repo##*/}"
+		printf '%s:%s\n' "$(cat "${repo}"/metadata/priority)" "${repo##*/}"
 done | sort -t: -k 1n | cut -d: -f2-
 

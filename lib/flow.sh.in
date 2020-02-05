@@ -1,13 +1,14 @@
 #!/bin/sh
 
+# shellcheck disable=SC2154
 if [ -z "${NO_COLOR}" ]; then
-	color_red=$(tput setaf 1)
-	color_yellow=$(tput setaf 3)
-	color_reset=$(tput sgr0)
+	color_red=$(printf '\e[31m') # $(tput setaf 1)
+	color_yellow=$(printf '\e[33m') # $(tput setaf 3)
+	color_reset=$(printf '\e[0m') # $(tput sgr0)
 fi
 
 pdo() {
-	local dry_run=false die=true arg
+	local dry_run=false die=true
 	while [ $# -gt 0 ] && [ "${1:0:1}" = '-' ]; do
 		case "$1" in
 			-n)
@@ -51,6 +52,7 @@ pwarning() {
 }
 
 pstderr() {
+	# shellcheck disable=SC2059
 	printf "$@" >&2
 }
 
