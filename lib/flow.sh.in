@@ -3,6 +3,7 @@
 # shellcheck disable=SC2154
 if [ -z "${NO_COLOR}" ]; then
 	color_red=$(printf '\e[31m') # $(tput setaf 1)
+	color_green=$(printf '\e[32m') # $(tput setaf 2)
 	color_yellow=$(printf '\e[33m') # $(tput setaf 3)
 	color_reset=$(printf '\e[0m') # $(tput sgr0)
 fi
