@@ -4,30 +4,19 @@
 . "@@libdir@@"/theory.sh
 . "@@libdir@@"/text.sh
 
-usage() { die "usage: %s [-r] [-a OUTPUT] [-o OUTPUT] THEORY...\n" "${0##*/}"; }
+usage() { die "usage: %s [-r] THEORY...\n" "${0##*/}"; }
 
-append=false
-overwrite=false
 recurse=false
-while getopts :ra:o: arg >/dev/null 2>&1; do
+while getopts :r arg >/dev/null 2>&1; do
 	case "${arg}" in
 		r)
 			recurse=true
-			;;
-		a)
-			append=true
-			exec >> "${OPTARG}"
-			;;
-		o)
-			overwrite=true
-			exec > "${OPTARG}"
 			;;
 		?)
 			error "unknown argument -- %s\n" "${OPTARG}"
 			usage
 			;;
 	esac
-	"${append}" && "${overwrite}" && error -d "-a and -o are mutually exclusive\n"
 done
 shift $(( OPTIND - 1 ))
 
