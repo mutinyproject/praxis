@@ -5,6 +5,7 @@ if [ -z "${NO_COLOR}" ]; then
 	color_red=$(printf '\e[31m') # $(tput setaf 1)
 	color_green=$(printf '\e[32m') # $(tput setaf 2)
 	color_yellow=$(printf '\e[33m') # $(tput setaf 3)
+	color_bold=$(printf '\e[1m') # $(tput bold)
 	color_reset=$(printf '\e[0m') # $(tput sgr0)
 fi
 
@@ -43,13 +44,18 @@ perror() {
 	esac
 
 	local msg="${1}"; shift
-	pstderr "${color_red}!!${color_reset} ${msg}" "$@"
+	pstderr "${color_bold}${color_red}!!${color_reset} ${msg}" "$@"
 	"${die}" && die
 }
 
 pwarning() {
 	local msg="${1}"; shift
-	pstderr "${color_yellow}!?${color_reset} ${msg}" "$@"
+	pstderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
+}
+
+pinfo() {
+	local msg="${1}"; shift
+	stderr "${color_bold}${color_green}..${color_reset} ${msg}" "$@"
 }
 
 pstderr() {

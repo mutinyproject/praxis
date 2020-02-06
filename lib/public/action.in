@@ -1,14 +1,14 @@
 #!/bin/sh
 eerror() {
-	pstderr "${color_red}!!${color_reset} %s\n" "$@"
+	pstderr "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
 }
 
 ewarning() {
-	pstderr "${color_yellow}!?${color_reset} ${msg}" "$@"
+	pstderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
 }
 
 einfo() {
-	printf "${color_green}..${color_reset} %s\n" "$@"
+	printf "${color_bold}${color_green}..${color_reset} %s\n" "$@"
 }
 
 default_pkg_init() { :; }
