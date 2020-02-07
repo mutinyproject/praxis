@@ -11,11 +11,13 @@ edie() {
 }
 
 eerror() {
-	pstderr "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
+	[ "${1}" = -d ] && local die=true && shift
+	estderr "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
+	"${die}" && edie
 }
 
 ewarning() {
-	pstderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
+	estderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
 }
 
 einfo() {
