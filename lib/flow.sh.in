@@ -31,7 +31,7 @@ pdo() {
 
 pdie() {
 	[ "$#" -gt 0 ] && pstderr "$@"
-	exit
+	exit 1
 }
 
 perror() {
