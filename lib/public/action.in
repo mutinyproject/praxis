@@ -1,4 +1,15 @@
 #!/bin/sh
+
+estderr() {
+	# shellcheck disable=SC2059
+	printf "$@" >&2
+}
+
+edie() {
+	[ -n "$@" ] && estderr "$@"
+	exit 1
+}
+
 eerror() {
 	pstderr "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
 }
