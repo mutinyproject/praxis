@@ -7,6 +7,9 @@ usage() { pdie "usage: %s [-cdv] [REPOSITORY...]\n" "${0##*/}"; }
 changes=false
 dry_run=false
 verbose=false
+
+git_verbose=
+git_quiet=true
 while getopts :cdv arg >/dev/null 2>&1; do
 	case "${arg}" in
 		c)
@@ -17,6 +20,8 @@ while getopts :cdv arg >/dev/null 2>&1; do
 			;;
 		v)
 			verbose=true
+			git_verbose=true
+			git_quiet=
 			;;
 		?)
 			perror "unknown argument -- %s\n" "${OPTARG}"
@@ -41,11 +46,9 @@ for repo in "$@"; do
 
 	if [ -x "${repo_loc}"/.git ]; then
 		repo_branch=$(git -C "${repo_loc}" rev-parse --abbrev-ref HEAD)
-		${pdo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
+		${pdo} git -C "${repo_loc}" fetch ${git_quiet:+-q} ${git_verbose:+-v} origin "${repo_branch}"
 
-		if "${changes}" && [ $(git -C "${repo_loc}" log --oneline ..@{u} | wc -l) -gt 0 ]; then
-			[ -n "${NO_COLOR}" ] && NO_COLOR=--color=never
-
+		if "${changes}" && [ "$(git -C "${repo_loc}" log --oneline '..@{u}' | wc -l)" -gt 0 ]; then
 			before_date=$(git -C "${repo_loc}" show -s --format=%cd --date=human-local HEAD)
 			printf 'Changes in %s since %s:\n' "${repo}" "${before_date}"
 			PAGER=cat ${pdo} git -C "${repo_loc}" log \
@@ -54,7 +57,7 @@ for repo in "$@"; do
 				..@{u}
 		fi
 
-		${pdo} git -C "${repo_loc}" reset --hard -q origin/"${repo_branch}"
+		${pdo} git -C "${repo_loc}" reset --hard ${git_quiet:+-q} origin/"${repo_branch}"
 	else
 		pwarning "unsure of how to update '%s'\n" "${repo}"
 	fi
