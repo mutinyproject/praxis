@@ -38,10 +38,12 @@ pdo=
 "${dry_run}" || [ -w "@@dbdir@@"/repositories ] ||
 	perror -d "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
 
+# We want to split on words here.
+# shellcheck disable=SC2046
 [ $# -gt 0 ] || set -- $(repo-list)
 
 for repo in "$@"; do
-	repo_loc="@@dbdir@@"/repositories/"${repo}"
+	repo_loc="@@dbdir@@/repositories/${repo}"
 	[ -d "${repo_loc}" ] || perror -d "'%s' is not a repository\n" "${repo_loc}"
 
 	if [ -x "${repo_loc}"/.git ]; then
@@ -51,10 +53,10 @@ for repo in "$@"; do
 		if "${changes}" && [ "$(git -C "${repo_loc}" log --oneline '..@{u}' | wc -l)" -gt 0 ]; then
 			before_date=$(git -C "${repo_loc}" show -s --format=%cd --date=human-local HEAD)
 			printf 'Changes in %s since %s:\n' "${repo}" "${before_date}"
-			PAGER=cat ${pdo} git -C "${repo_loc}" log \
-				--reverse ${NO_COLOR:---color=auto} \
-				--format=$'\t%C(yellow)%h%C(reset) %s (%aN <%aE>)' \
-				..@{u}
+			PAGER='cat' ${pdo} git -C "${repo_loc}" log \
+				--reverse \
+				--format="$(printf '\t%s' '%C(yellow)%h%C(reset) %s (%aN <%aE>)')" \
+				'..@{u}'
 		fi
 
 		${pdo} git -C "${repo_loc}" reset --hard ${git_quiet:+-q} origin/"${repo_branch}"
@@ -65,19 +67,19 @@ done
 
 shift $#
 for repo in $(repo-list -l | tac); do
-	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/libraries
+	set -- "$@" "@@dbdir@@/repositories/${repo}/libraries"
 done
 
 if [ "$#" -gt 0 ]; then
-	${pdo} s6-update-symlinks "@@dbdir@@"/libraries "$@"
+	${pdo} s6-update-symlinks "@@dbdir@@/libraries" "$@"
 fi
 
 shift $#
 for repo in $(repo-list -p | tac); do
-	set -- "$@" "@@dbdir@@"/repositories/"${repo}"/packages
+	set -- "$@" "@@dbdir@@/repositories/${repo}/packages"
 done
 
 if [ "$#" -gt 0 ]; then
-	${pdo} s6-update-symlinks "@@dbdir@@"/packages "$@"
+	${pdo} s6-update-symlinks "@@dbdir@@/packages" "$@"
 fi
 

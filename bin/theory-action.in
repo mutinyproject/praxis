@@ -24,11 +24,12 @@ shift $(( OPTIND - 1 ))
 
 while [ "$#" -gt 0 ]; do
 	is_theory_dir "${1}" || perror -d "'%s' is not a directory containing a package or library\n" "${1}"
-	theory=$(readlink -f "${1}")
 
 	if "${recurse}" && [ -r "${1}"/libraries ]; then
+		# TODO(somasis): arguments are not used for anything yet.
+		# shellcheck disable=SC2034
 		backslash "${1}"/libraries | while read -r library arguments; do
-			theory-action -r "@@dbdir@@"/libraries/"${library}"
+			theory-action -r "@@dbdir@@/libraries/${library}"
 		done
 	fi
 

@@ -24,29 +24,34 @@ shift $(( OPTIND - 1 ))
 
 while [ "$#" -gt 0 ]; do
 	is_theory_dir "${1}" || perror -d "'%s' is not a directory containing a package or library\n" "${1}"
-	theory=$(readlink -f "${1}")
+	resolved_dir=$(readlink -f "${1}")
 
-	if is_package_dir "${theory}"; then
-		PN="${theory##*/}"
-		PV="${PN#*#}"; PN="${PN%#*}"
+	if is_package_dir "${resolved_dir}"; then
+		THEORY=$(basename "${resolved_dir}")
+		PN="${THEORY##*/}"
+		PV="${PN#*#}"
+		PN="${PN%#*}"
 		PNV="${PN}-${PV}"
 
 		printf '%s="%s"\n' \
+			THEORY "${THEORY}" \
 			PN "${PN}" \
 			PV "${PV}" \
 			PNV "${PNV}"
 	fi
 
 	if "${recurse}" && [ -r "${1}"/libraries ]; then
+		# TODO(somasis): arguments are not used for anything yet.
+		# shellcheck disable=SC2034
 		backslash "${1}"/libraries | while read -r library arguments; do
-			theory-metadata -r "@@dbdir@@"/libraries/"${library}"
+			theory-metadata -r "@@dbdir@@/libraries/${library}"
 		done
 	fi
 
 	if test -x "${1}"/metadata; then
 		for v in "${1}"/metadata/*; do
 			test -f "${v}" || break
-			printf '%s="%s"\n' "${v##*/}" "$(cat "${v}" | s6-quote-filter -u)"
+			printf '%s="%s"\n' "${v##*/}" "$(s6-quote-filter -u <"${v}")"
 		done
 	fi
 

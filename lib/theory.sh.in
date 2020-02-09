@@ -6,9 +6,8 @@
 is_theory_dir() {
 	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
-	{ [ -r "${1}"/action -a -s "${1}"/action ] || \
-		[ -r "${1}"/libraries -a -s "${1}"/libraries ]; } &&
-		return 0
+	[ -r "${1}"/action ] && [ -s "${1}"/action ] && return 0
+	[ -r "${1}"/libraries ] && [ -s "${1}"/libraries ] && return 0
 
 	return 1
 }
@@ -16,8 +15,8 @@ is_theory_dir() {
 is_repository_dir() {
 	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
-	[ -d "${1}"/packages -a -d "${1}"/metadata ] && \
-		[ -d "${1}"/libraries -a -d "${1}"/metadata ] &&
+	[ -d "${1}"/packages ] && [ -d "${1}"/metadata ] &&
+		[ -d "${1}"/libraries ] && [ -d "${1}"/metadata ] &&
 		return 0
 
 	return 1

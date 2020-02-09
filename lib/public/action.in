@@ -6,7 +6,7 @@ estderr() {
 }
 
 edie() {
-	[ -n "$@" ] && estderr "$@"
+	[ "$#" -gt 0 ] && estderr "$@"
 	exit 1
 }
 
@@ -17,7 +17,7 @@ eerror() {
 }
 
 ewarning() {
-	estderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
+	estderr "${color_bold}${color_yellow}!?${color_reset} %s\n" "$@"
 }
 
 einfo() {
