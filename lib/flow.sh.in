@@ -2,16 +2,28 @@
 
 # shellcheck disable=SC2154
 if [ -z "${NO_COLOR}" ]; then
-	color_red=$(printf '\e[31m') # $(tput setaf 1)
-	color_green=$(printf '\e[32m') # $(tput setaf 2)
+	color_red=$(printf '\e[31m')    # $(tput setaf 1)
+	color_green=$(printf '\e[32m')  # $(tput setaf 2)
 	color_yellow=$(printf '\e[33m') # $(tput setaf 3)
-	color_bold=$(printf '\e[1m') # $(tput bold)
-	color_reset=$(printf '\e[0m') # $(tput sgr0)
+	color_bold=$(printf '\e[1m')    # $(tput bold)
+	color_reset=$(printf '\e[0m')   # $(tput sgr0)
 fi
 
 pdo() {
 	local dry_run=false die=true
-	while [ $# -gt 0 ] && [ "${1:0:1}" = '-' ]; do
+
+	# NOTE(somasis): string slicing would make this nicer and more obvious,
+	#                but that is a bash/mksh extension.
+	while [ $# -gt 0 ]; do
+		case "$1" in
+			-*)
+				:
+				;;
+			*)
+				break
+				;;
+		esac
+
 		case "$1" in
 			-n)
 				local dry_run=true
@@ -25,7 +37,10 @@ pdo() {
 
 	pstderr "+ %s\n" "$*"
 	if ! "${dry_run}"; then
-		"$@" || { err_code=$?; "${die}" && perror -d "command \`%s\` exited with %s\n" "$*" "${err_code}"; }
+		"$@" || {
+			err_code=$?
+			"${die}" && perror -d "command \`%s\` exited with %s\n" "$*" "${err_code}"
+		}
 	fi
 }
 
@@ -43,18 +58,21 @@ perror() {
 			;;
 	esac
 
-	local msg="${1}"; shift
+	local msg="${1}"
+	shift
 	pstderr "${color_bold}${color_red}!!${color_reset} ${msg}" "$@"
 	"${die}" && pdie
 }
 
 pwarning() {
-	local msg="${1}"; shift
+	local msg="${1}"
+	shift
 	pstderr "${color_bold}${color_yellow}!?${color_reset} ${msg}" "$@"
 }
 
 pinfo() {
-	local msg="${1}"; shift
+	local msg="${1}"
+	shift
 	pstderr "${color_bold}${color_green}..${color_reset} ${msg}" "$@"
 }
 
@@ -62,4 +80,3 @@ pstderr() {
 	# shellcheck disable=SC2059
 	printf "$@" >&2
 }
-

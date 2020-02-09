@@ -29,8 +29,7 @@ while getopts :cdv arg >/dev/null 2>&1; do
 			;;
 	esac
 done
-shift $(( OPTIND - 1 ))
-
+shift $((OPTIND - 1))
 
 pdo=
 "${verbose}" && pdo="pdo"
@@ -82,4 +81,3 @@ done
 if [ "$#" -gt 0 ]; then
 	${pdo} s6-update-symlinks "@@dbdir@@/packages" "$@"
 fi
-

@@ -40,6 +40,10 @@ install: $(INSTALLS)
 lint:
 	printf '%s\n' $(patsubst %,%.in,$(BINS)) $(patsubst %,%.in,$(LIBS)) | xargs shellcheck
 
+.PHONY: fmt
+fmt:
+	printf '%s\n' $(patsubst %,%.in,$(BINS)) $(patsubst %,%.in,$(LIBS)) | xargs shfmt -d
+
 .PHONY: bin
 bin: $(BINS)
 
