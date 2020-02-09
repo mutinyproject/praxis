@@ -23,7 +23,7 @@ pdo() {
 		shift
 	done
 
-	stderr "+ %s\n" "$*"
+	pstderr "+ %s\n" "$*"
 	if ! "${dry_run}"; then
 		"$@" || { err_code=$?; "${die}" && perror -d "command \`%s\` exited with %s\n" "$*" "${err_code}"; }
 	fi
@@ -45,7 +45,7 @@ perror() {
 
 	local msg="${1}"; shift
 	pstderr "${color_bold}${color_red}!!${color_reset} ${msg}" "$@"
-	"${die}" && die
+	"${die}" && pdie
 }
 
 pwarning() {
@@ -55,7 +55,7 @@ pwarning() {
 
 pinfo() {
 	local msg="${1}"; shift
-	stderr "${color_bold}${color_green}..${color_reset} ${msg}" "$@"
+	pstderr "${color_bold}${color_green}..${color_reset} ${msg}" "$@"
 }
 
 pstderr() {

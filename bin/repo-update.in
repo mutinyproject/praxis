@@ -2,7 +2,7 @@
 
 . "@@libdir@@"/flow.sh
 
-usage() { die "usage: %s [-cdv] [REPOSITORY...]\n" "${0##*/}"; }
+usage() { pdie "usage: %s [-cdv] [REPOSITORY...]\n" "${0##*/}"; }
 
 changes=false
 dry_run=false
@@ -19,45 +19,44 @@ while getopts :cdv arg >/dev/null 2>&1; do
 			verbose=true
 			;;
 		?)
-			error "unknown argument -- %s\n" "${OPTARG}"
+			perror "unknown argument -- %s\n" "${OPTARG}"
 			usage
 			;;
 	esac
 done
 shift $(( OPTIND - 1 ))
 
-edo=
 
-"${verbose}" && edo="edo"
-"${dry_run}" && edo="edo -d"
-"${dry_run}" || [ -w "@@dbdir@@"/repositories ] || \
-	error -d "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
-"${verbose}" || verbose=
+pdo=
+"${verbose}" && pdo="pdo"
+"${dry_run}" && pdo="pdo -n"
+"${dry_run}" || [ -w "@@dbdir@@"/repositories ] ||
+	perror -d "Can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
 
 [ $# -gt 0 ] || set -- $(repo-list)
 
 for repo in "$@"; do
 	repo_loc="@@dbdir@@"/repositories/"${repo}"
-	[ -d "${repo_loc}" ] || error -d "'%s' is not a repository\n" "${repo_loc}"
+	[ -d "${repo_loc}" ] || perror -d "'%s' is not a repository\n" "${repo_loc}"
 
 	if [ -x "${repo_loc}"/.git ]; then
 		repo_branch=$(git -C "${repo_loc}" rev-parse --abbrev-ref HEAD)
-		${edo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
+		${pdo} git -C "${repo_loc}" fetch -q ${verbose:+-v} origin "${repo_branch}"
 
 		if "${changes}" && [ $(git -C "${repo_loc}" log --oneline ..@{u} | wc -l) -gt 0 ]; then
 			[ -n "${NO_COLOR}" ] && NO_COLOR=--color=never
 
 			before_date=$(git -C "${repo_loc}" show -s --format=%cd --date=human-local HEAD)
 			printf 'Changes in %s since %s:\n' "${repo}" "${before_date}"
-			PAGER=cat ${edo} git -C "${repo_loc}" log \
+			PAGER=cat ${pdo} git -C "${repo_loc}" log \
 				--reverse ${NO_COLOR:---color=auto} \
 				--format=$'\t%C(yellow)%h%C(reset) %s (%aN <%aE>)' \
 				..@{u}
 		fi
 
-		${edo} git -C "${repo_loc}" reset --hard -q origin/"${repo_branch}"
+		${pdo} git -C "${repo_loc}" reset --hard -q origin/"${repo_branch}"
 	else
-		warning "unsure of how to update '%s'\n" "${repo}"
+		pwarning "unsure of how to update '%s'\n" "${repo}"
 	fi
 done
 
@@ -67,7 +66,7 @@ for repo in $(repo-list -l | tac); do
 done
 
 if [ "$#" -gt 0 ]; then
-	${edo} s6-update-symlinks "@@dbdir@@"/libraries "$@"
+	${pdo} s6-update-symlinks "@@dbdir@@"/libraries "$@"
 fi
 
 shift $#
@@ -76,6 +75,6 @@ for repo in $(repo-list -p | tac); do
 done
 
 if [ "$#" -gt 0 ]; then
-	${edo} s6-update-symlinks "@@dbdir@@"/packages "$@"
+	${pdo} s6-update-symlinks "@@dbdir@@"/packages "$@"
 fi
 
