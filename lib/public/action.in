@@ -11,9 +11,7 @@ edie() {
 }
 
 eerror() {
-	[ "${1}" = -d ] && local die=true && shift
-	estderr "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
-	"${die}" && edie
+	edie "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
 }
 
 ewarning() {

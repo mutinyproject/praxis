@@ -61,6 +61,7 @@ perror() {
 	local msg="${1}"
 	shift
 	pstderr "${color_bold}${color_red}!!${color_reset} ${msg}" "$@"
+
 	"${die}" && pdie
 }
 
