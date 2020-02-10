@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . "@@libdir@@"/flow.sh
-. "@@libdir@@"/file.sh
 
 libraries_only=false
 packages_only=false
@@ -25,8 +24,8 @@ done
 shift $((OPTIND - 1))
 
 for repo in "@@dbdir@@"/repositories/*/; do
-	"${libraries_only}" && is_empty "${repo}"/libraries && continue
-	"${packages_only}" && is_empty "${repo}"/packages && continue
+	"${libraries_only}" && ! [ -d "${repo}"/libraries ] && continue
+	"${packages_only}" && ! [ -d "${repo}"/packages ] && continue
 
 	[ -r "${repo}"/metadata/priority ] &&
 		printf '%s:%s\n' "$(cat "${repo}"/metadata/priority)" "$(basename "${repo}")"
