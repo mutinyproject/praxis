@@ -24,10 +24,10 @@ while getopts :lp arg >/dev/null 2>&1; do
 done
 shift $((OPTIND - 1))
 
-for repo in "@@dbdir@@"/repositories/*; do
+for repo in "@@dbdir@@"/repositories/*/; do
 	"${libraries_only}" && is_empty "${repo}"/libraries && continue
 	"${packages_only}" && is_empty "${repo}"/packages && continue
 
 	[ -r "${repo}"/metadata/priority ] &&
-		printf '%s:%s\n' "$(cat "${repo}"/metadata/priority)" "${repo##*/}"
+		printf '%s:%s\n' "$(cat "${repo}"/metadata/priority)" "$(basename "${repo}")"
 done | sort -t: -k 1n | cut -d: -f2-

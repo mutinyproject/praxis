@@ -62,11 +62,11 @@ bin/%: bin/%.in
 		-e "s|@@version@@|$(version)|g" \
 		-e "s|@@prefix@@|$(prefix)|g" \
 		-e "s|@@bindir@@|$(bindir)|g" \
-		-e "s|@@libdir@@|$(libdir)|g" \
+		-e "s|@@libdir@@|$$\{PRAXIS_LIBDIR:-$(libdir)\}|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@builddir@@|$(builddir)|g" \
-		-e "s|@@cachedir@@|$(cachedir)|g" \
-		-e "s|@@dbdir@@|$(dbdir)|g" \
+		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
+		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
+		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
 		$< > $@
 	chmod +x $@
 
@@ -76,11 +76,11 @@ lib/%: lib/%.in
 		-e "s|@@version@@|$(version)|g" \
 		-e "s|@@prefix@@|$(prefix)|g" \
 		-e "s|@@bindir@@|$(bindir)|g" \
-		-e "s|@@libdir@@|$(libdir)|g" \
+		-e "s|@@libdir@@|$$\{PRAXIS_LIBDIR:-$(libdir)\}|g" \
 		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@builddir@@|$(builddir)|g" \
-		-e "s|@@cachedir@@|$(cachedir)|g" \
-		-e "s|@@dbdir@@|$(dbdir)|g" \
+		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
+		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
+		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
 		$< > $@
 
 .DELETE_ON_ERROR: man/%
