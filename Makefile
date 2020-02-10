@@ -1,7 +1,7 @@
 name = praxis
 version = 20200121
 
-prefix ?= 
+prefix ?=
 bindir ?= $(prefix)/bin
 libdir ?= $(prefix)/lib
 localstatedir ?= $(prefix)/var
@@ -12,8 +12,8 @@ builddir := $(localstatedir)/tmp/$(name)/build
 dbdir := $(localstatedir)/db/$(name)
 cachedir := $(localstatedir)/cache/$(name)
 
-BINS := $(patsubst %.in, %, $(shell find bin/ -name '*.in'))
-LIBS := $(patsubst %.in, %, $(shell find lib/ -name '*.in'))
+BINS := $(patsubst %.in, %, $(wildcard bin/*.in))
+LIBS := $(patsubst %.in, %, $(wildcard lib/*.in))
 MANS := $(patsubst %.adoc, %, $(wildcard man/*.adoc))
 HTMLS := $(patsubst %.adoc, %.html, $(wildcard man/*.adoc))
 
@@ -83,7 +83,7 @@ lib/%: lib/%.in
 		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
 		$< > $@
 
-.DELETE_ON_ERROR: man/%
+.DELETE_ON_ERROR: man/%.html
 man/%.html: man/%.adoc
 	asciidoctor --failure-level=WARNING -b html5 -B $(PWD) -o $@ $<
 
