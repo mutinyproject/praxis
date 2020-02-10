@@ -3,4 +3,5 @@ lib/public/*
 man/*.html
 **.sh
 
+!spec/*.sh
 !*.in

@@ -1,0 +1,16 @@
+src_fetch() {
+	echo this command is in src_fetch.
+}
+
+src_configure() {
+	echo this command is in src_configure.
+}
+
+src_build() {
+	echo this command is in src_build.
+}
+
+src_install() {
+	echo this command is in src_install.
+}
+

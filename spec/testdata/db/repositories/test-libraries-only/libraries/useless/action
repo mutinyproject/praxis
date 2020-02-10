@@ -1,0 +1,20 @@
+useless_src_fetch() {
+	echo this useless library command is in src_fetch.
+}
+
+useless_src_configure() {
+	echo this useless library command is in src_configure.
+}
+
+useless_src_build() {
+	echo this useless library command is in src_build.
+}
+
+useless_src_install() {
+	echo this useless library command is in src_install.
+}
+
+src_fetch() { useless_src_fetch; }
+src_configure() { useless_src_configure; }
+src_build() { useless_src_build; }
+src_install() { useless_src_install; }

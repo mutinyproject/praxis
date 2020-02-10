@@ -44,6 +44,13 @@ lint:
 fmt:
 	printf '%s\n' $(patsubst %,%.in,$(BINS)) $(patsubst %,%.in,$(LIBS)) | xargs shfmt -d
 
+.PHONY: test
+test: check
+
+.PHONY: check
+check: bin lib
+	shellspec $(SHELLSPEC_FLAGS)
+
 .PHONY: bin
 bin: $(BINS)
 
