@@ -3,5 +3,9 @@ lib/public/*
 man/*.html
 **.sh
 
+# These should be generated during the `repo-update` tests.
+spec/testdata/db/libraries
+spec/testdata/db/packages
+
 !spec/*.sh
 !*.in

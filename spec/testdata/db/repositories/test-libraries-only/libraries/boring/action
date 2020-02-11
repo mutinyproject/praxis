@@ -1,0 +1,20 @@
+boring_src_fetch() {
+	echo this boring library command is in src_fetch.
+}
+
+boring_src_configure() {
+	echo this boring library command is in src_configure.
+}
+
+boring_src_build() {
+	echo this boring library command is in src_build.
+}
+
+boring_src_install() {
+	echo this boring library command is in src_install.
+}
+
+src_fetch() { boring_src_fetch; }
+src_configure() { boring_src_configure; }
+src_build() { boring_src_build; }
+src_install() { boring_src_install; }

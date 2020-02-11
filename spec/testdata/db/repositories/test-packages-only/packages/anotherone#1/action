@@ -1,0 +1,16 @@
+src_fetch() {
+	echo this command is in src_fetch in the another-one package.
+}
+
+src_configure() {
+	echo this command is in src_configure in the another-one package.
+}
+
+src_build() {
+	echo this command is in src_build in the another-one package.
+}
+
+src_install() {
+	echo this command is in src_install in the another-one package.
+}
+
