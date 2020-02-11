@@ -1,7 +1,5 @@
 #!/bin/sh
 
-. "@@libdir@@"/file.sh
-
 # at a bare minimum, a directory is a theory package/library directory if it contains an action or a library.
 is_theory_dir() {
 	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
