@@ -44,6 +44,8 @@ pdo() {
 	fi
 }
 
+# Ignore warning about arguments never being passed to pdie.
+# shellcheck disable=SC2120
 pdie() {
 	[ "$#" -gt 0 ] && pstderr "$@"
 	exit 1
