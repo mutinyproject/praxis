@@ -74,7 +74,6 @@ if [ "$#" -gt 0 ]; then
 	${pdo} s6-update-symlinks "@@dbdir@@/libraries" "$@"
 fi
 
-shift $#
 for repo in $(repo-list -p | tac); do
 	set -- "$@" "@@dbdir@@/repositories/${repo}/packages"
 done
