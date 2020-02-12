@@ -39,8 +39,7 @@ pdo=
 
 # We want to split on words here.
 # shellcheck disable=SC2046
-cd "@@dbdir@@"/repositories
-[ $# -gt 0 ] || set -- "@@dbdir@@/repositories"/*/
+[ $# -gt 0 ] || set -- $(repo-list)
 
 while [ $# -gt 0 ]; do
 	repo=$(readlink -f "${1}")
@@ -63,6 +62,7 @@ while [ $# -gt 0 ]; do
 	else
 		pwarning "unsure of how to update '%s'\n" "${repo}"
 	fi
+
 	shift
 done
 
