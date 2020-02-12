@@ -1,7 +1,7 @@
 image: alpine/latest
 
 sources:
-    - https://git.sr.ht/~somasis/praxis#main
+    - https://git.somas.is/git/mutiny/praxis#main
 
 packages:
     - asciidoctor
