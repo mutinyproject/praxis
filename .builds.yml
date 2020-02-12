@@ -1,0 +1,25 @@
+image: alpine/latest
+
+sources:
+    - https://git.sr.ht/~somasis/praxis#main
+
+packages:
+    - asciidoctor
+    - s6
+    - s6-portable-utils
+    - shellcheck
+
+tasks:
+    - install-shellspec: |
+        wget https://github.com/shellspec/shellspec/releases/download/0.21.0/shellspec-dist.tar.gz
+        tar xf shellspec-dist.tar.gz
+    - build: |
+        cd praxis
+        make
+    - lint: |
+        cd praxis
+        make lint
+    - test: |
+        export PATH="${PWD}/shellspec:${PATH}"
+        cd praxis
+        make check
