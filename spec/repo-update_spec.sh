@@ -4,9 +4,9 @@ Describe "repo-update"
 	It "updates all the repositories when given no arguments"
 		stderr() {
 			%text:expand
-			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'
-			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'
-			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-packages-only'
+			#|!? unsure of how to update 'test'
+			#|!? unsure of how to update 'test-libraries-only'
+			#|!? unsure of how to update 'test-packages-only'
 		}
 
 		When call repo-update
@@ -17,8 +17,8 @@ Describe "repo-update"
 	It "updates only repositories given as arguments, if given any arguments"
 		stderr() {
 			%text:expand
-			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'
-			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'
+			#|!? unsure of how to update 'test'
+			#|!? unsure of how to update 'test-libraries-only'
 		}
 
 		When call repo-update test test-libraries-only
