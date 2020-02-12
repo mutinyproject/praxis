@@ -2,25 +2,40 @@
 
 Describe "repo-list"
 	It "lists repositories in order of priority"
+		stdout() {
+			%text
+			#|test
+			#|test-libraries-only
+			#|test-packages-only
+		}
+
 		When call repo-list
-		The lines of the entire output should eq 3
-		The first line of output should eq 'test'
-		The second line of output should eq 'test-libraries-only'
-		The third line of output should eq 'test-packages-only'
+		The status should eq 0
+		The stdout should eq "$(stdout)"
 	End
 
 	It "only lists repositories with libraries in them when -l is given"
+		stdout() {
+			%text
+			#|test
+			#|test-libraries-only
+		}
+
 		When call repo-list -l
-		The lines of the entire output should eq 2
-		The first line of output should eq 'test'
-		The second line of output should eq 'test-libraries-only'
+		The status should eq 0
+		The stdout should eq "$(stdout)"
 	End
 
 	It "only lists repositories with packages in them when -p is given"
+		stdout() {
+			%text
+			#|test
+			#|test-packages-only
+		}
+
 		When call repo-list -p
-		The lines of the entire output should eq 2
-		The first line of output should eq 'test'
-		The second line of output should eq 'test-packages-only'
+		The status should eq 0
+		The stdout should eq "$(stdout)"
 	End
 
 	It "will error out if you give it an unknown argument"

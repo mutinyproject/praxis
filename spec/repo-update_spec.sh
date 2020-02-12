@@ -2,27 +2,28 @@
 
 Describe "repo-update"
 	It "updates all the repositories when given no arguments"
+		stderr() {
+			%text:expand
+			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'
+			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'
+			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-packages-only'
+		}
+
 		When call repo-update
 		The status should eq 0
-		The lines of the entire stdout should eq 0
-		The lines of the entire stderr should eq 3
-		The line 1 of the stderr should eq \
-			"!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'"
-		The line 2 of the stderr should eq \
-			"!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'"
-		The line 3 of the stderr should eq \
-			"!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-packages-only'"
+		The stderr should eq "$(stderr)"
 	End
 
 	It "updates only repositories given as arguments, if given any arguments"
+		stderr() {
+			%text:expand
+			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'
+			#|!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'
+		}
+
 		When call repo-update test test-libraries-only
 		The status should eq 0
-		The lines of the entire stdout should eq 0
-		The lines of the entire stderr should eq 2
-		The line 1 of the stderr should eq \
-			"!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test'"
-		The line 2 of the stderr should eq \
-			"!? unsure of how to update '${PRAXIS_DBDIR}/repositories/test-libraries-only'"
+		The stderr should eq "$(stderr)"
 	End
 
 	It "will error out if you give it an unknown argument"
@@ -41,4 +42,3 @@ Describe "repo-update"
 		Pending "not yet certain of the best way to test this"
 	End
 End
-
