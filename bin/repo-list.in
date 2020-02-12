@@ -2,6 +2,9 @@
 
 . "@@libdir@@"/flow.sh
 
+# Ensure stable sort order.
+export LC_ALL=C
+
 libraries_only=false
 packages_only=false
 
@@ -24,6 +27,7 @@ done
 shift $((OPTIND - 1))
 
 for repo in "@@dbdir@@"/repositories/*/; do
+	[ -d "${repo}" ] || continue
 	"${libraries_only}" && ! [ -d "${repo}"/libraries ] && continue
 	"${packages_only}" && ! [ -d "${repo}"/packages ] && continue
 
