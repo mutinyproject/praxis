@@ -31,6 +31,8 @@ cd "@@dbdir@@/repositories" || \
 
 for repo in *; do
 	[ -d "${repo}" ] || continue
+	case "${repo}" in .*) continue ;; esac
+
 	"${libraries_only}" && ! [ -d "${repo}"/libraries ] && continue
 	"${packages_only}" && ! [ -d "${repo}"/packages ] && continue
 
