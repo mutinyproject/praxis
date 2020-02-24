@@ -8,37 +8,37 @@ usage() { pdie "usage: %s [-r] THEORY...\n" "${0##*/}"; }
 
 recurse=false
 while getopts :r arg >/dev/null 2>&1; do
-	case "${arg}" in
-		r)
-			recurse=true
-			;;
-		?)
-			perror "unknown argument -- %s\n" "${OPTARG}"
-			usage
-			;;
-	esac
+    case "${arg}" in
+        r)
+            recurse=true
+            ;;
+        ?)
+            perror "unknown argument -- %s\n" "${OPTARG}"
+            usage
+            ;;
+    esac
 done
 shift $((OPTIND - 1))
 
 [ "$#" -eq 0 ] && usage
 
 while [ "$#" -gt 0 ]; do
-	is_theory_dir "${1}" || perror -d "'%s' is not a directory containing a package or library\n" "${1}"
+    is_theory_dir "${1}" || perror -d "'%s' is not a directory containing a package or library\n" "${1}"
 
-	if "${recurse}" && [ -r "${1}"/libraries ]; then
-		# TODO(somasis): arguments are not used for anything yet.
-		# shellcheck disable=SC2034
-		backslash "${1}"/libraries | while read -r library arguments; do
-			theory-action -r "@@dbdir@@/libraries/${library}"
-		done
-	fi
+    if "${recurse}" && [ -r "${1}"/libraries ]; then
+        # TODO(somasis): arguments are not used for anything yet.
+        # shellcheck disable=SC2034
+        backslash "${1}"/libraries | while read -r library arguments; do
+            theory-action -r "@@dbdir@@/libraries/${library}"
+        done
+    fi
 
-	if test -r "${1}"/action -a -s "${1}"/action; then
-		sh -n "${1}"/action || perror -d "syntax error in '%s', dying\n" "${1}/action"
-		cat "${1}"/action
-	else
-		exit 0
-	fi
+    if test -r "${1}"/action -a -s "${1}"/action; then
+        sh -n "${1}"/action || perror -d "syntax error in '%s', dying\n" "${1}/action"
+        cat "${1}"/action
+    else
+        exit 0
+    fi
 
-	shift
+    shift
 done

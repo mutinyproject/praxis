@@ -1,41 +1,41 @@
 #!/bin/sh
 
 estderr() {
-	# shellcheck disable=SC2059
-	printf "$@" >&2
+    # shellcheck disable=SC2059
+    printf "$@" >&2
 }
 
 edie() {
-	[ "$#" -gt 0 ] && estderr "$@"
-	exit 1
+    [ "$#" -gt 0 ] && estderr "$@"
+    exit 1
 }
 
 eerror() {
-	edie "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
+    edie "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
 }
 
 ewarning() {
-	estderr "${color_bold}${color_yellow}!?${color_reset} %s\n" "$@"
+    estderr "${color_bold}${color_yellow}!?${color_reset} %s\n" "$@"
 }
 
 einfo() {
-	printf "${color_bold}${color_green}..${color_reset} %s\n" "$@"
+    printf "${color_bold}${color_green}..${color_reset} %s\n" "$@"
 }
 
 default_pkg_init() { :; }
 
 default_src_fetch() {
-	OLDIFS="${IFS}"; IFS=$'\n'; set -- "${SOURCES}"; IFS="${OLDIFS}"; unset OLDIFS
+    OLDIFS="${IFS}"; IFS=$'\n'; set -- "${SOURCES}"; IFS="${OLDIFS}"; unset OLDIFS
 
-	while [ $# -gt 0 ]; do
-		local output="${FETCHDIR}"/"$(basename "$1")"
-		if ! [ -f "${output}" ]; then
-			edo curl -# -L -C - -o "${output}".part "$1"
-			edo mv "${output}".part "${output}"
-		fi
+    while [ $# -gt 0 ]; do
+        local output="${FETCHDIR}"/"$(basename "$1")"
+        if ! [ -f "${output}" ]; then
+            edo curl -# -L -C - -o "${output}".part "$1"
+            edo mv "${output}".part "${output}"
+        fi
 
-		shift
-	done
+        shift
+    done
 }
 
 default_src_unpack() { :; }

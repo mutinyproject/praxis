@@ -1,9 +1,9 @@
 #!/bin/sh
 
 backslash() {
-	sed ":x; /\\\\$/ { N; s/\\\\\n//; tx }" "$@"
+    sed ":x; /\\\\$/ { N; s/\\\\\n//; tx }" "$@"
 }
 
 tac() {
-	sed '1!G;h;$!d' "$@"
+    sed '1!G;h;$!d' "$@"
 }

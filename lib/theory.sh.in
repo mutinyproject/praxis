@@ -2,36 +2,36 @@
 
 # at a bare minimum, a directory is a theory package/library directory if it contains an action or a library.
 is_theory_dir() {
-	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
+    [ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
-	[ -r "${1}"/action ] && [ -s "${1}"/action ] && return 0
-	[ -r "${1}"/libraries ] && [ -s "${1}"/libraries ] && return 0
+    [ -r "${1}"/action ] && [ -s "${1}"/action ] && return 0
+    [ -r "${1}"/libraries ] && [ -s "${1}"/libraries ] && return 0
 
-	return 1
+    return 1
 }
 
 is_repository_dir() {
-	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
+    [ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
-	[ -d "${1}"/packages ] && [ -d "${1}"/metadata ] &&
-		[ -d "${1}"/libraries ] && [ -d "${1}"/metadata ] &&
-		return 0
+    [ -d "${1}"/packages ] && [ -d "${1}"/metadata ] &&
+        [ -d "${1}"/libraries ] && [ -d "${1}"/metadata ] &&
+        return 0
 
-	return 1
+    return 1
 }
 
 is_package_dir() {
-	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
+    [ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
 
-	basename "${1}" | grep -Eq "^[A-Za-z][A-Za-z0-9_+-]*#[a-z0-9\._-]+$" &&
-		is_theory_dir "${1}" &&
-		return 0
+    basename "${1}" | grep -Eq "^[A-Za-z][A-Za-z0-9_+-]*#[a-z0-9\._-]+$" &&
+        is_theory_dir "${1}" &&
+        return 0
 
-	return 1
+    return 1
 }
 
 is_library_dir() {
-	[ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
-	! is_package_dir "${1}" && is_theory_dir "${1}" && return 0
-	return 1
+    [ -d "${1}" ] || perror -d "'%s' is not a directory\n" "${1}"
+    ! is_package_dir "${1}" && is_theory_dir "${1}" && return 0
+    return 1
 }
