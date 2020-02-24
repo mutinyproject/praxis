@@ -26,7 +26,7 @@ while getopts :lp arg >/dev/null 2>&1; do
 done
 shift $((OPTIND - 1))
 
-cd "@@dbdir@@/repositories" || \
+cd "@@dbdir@@/repositories" ||
 	perror -d "repositories directory '@@dbdir@@' does not exist"
 
 for repo in *; do

@@ -38,7 +38,7 @@ pdo=
 "${dry_run}" || [ -w "@@dbdir@@"/repositories ] ||
 	perror -d "can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
 
-cd "@@dbdir@@"/repositories || \
+cd "@@dbdir@@"/repositories ||
 	perror -d "can't change to repositories directory '%s'\n" "@@dbdir@@/repositories"
 
 # We want to split on words here. Whitespace is not allowed a repository name.

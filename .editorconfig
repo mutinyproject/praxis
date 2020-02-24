@@ -6,7 +6,3 @@ indent_style = tab
 tab_width = 4
 smart_tabs = true
 max_line_length = 100
-
-shell_variant = posix
-switch_case_indent = true
-space_redirects = false
