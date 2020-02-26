@@ -70,8 +70,9 @@ bin/%: bin/%.in
 		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
 		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
 		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
-		$< > $@
-	chmod +x $@
+		$< > $@.temp
+	chmod +x $@.temp
+	mv $@.temp $@
 
 lib/%: lib/%.in
 	sed \
@@ -84,7 +85,9 @@ lib/%: lib/%.in
 		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
 		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
 		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
-		$< > $@
+		$< > $@.temp
+	chmod +x $@.temp
+	mv $@.temp $@
 
 .DELETE_ON_ERROR: man/%.html
 man/%.html: man/%.adoc
