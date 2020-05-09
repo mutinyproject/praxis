@@ -21,6 +21,9 @@ INSTALLS := \
 	$(addprefix $(DESTDIR)$(bindir)/,$(BINS:bin/%=%)) \
 	$(addprefix $(DESTDIR)$(libdir)/,$(LIBS:lib/%=%))
 
+ASCIIDOCTOR ?= asciidoctor
+ASCIIDOCTOR += --failure-level=WARNING -B $(PWD)
+
 .PHONY: all
 all: bin lib man html
 
@@ -91,11 +94,11 @@ lib/%: lib/%.in
 
 .DELETE_ON_ERROR: man/%.html
 man/%.html: man/%.adoc
-	asciidoctor --failure-level=WARNING -b html5 -B $(PWD) -o $@ $<
+	$(ASCIIDOCTOR) -b html5 -o $@ $<
 
 .DELETE_ON_ERROR: man/%
 man/%: man/%.adoc
-	asciidoctor --failure-level=WARNING -b manpage -B $(PWD) -d manpage -o $@ $<
+	$(ASCIIDOCTOR) -b manpage -d manpage -o $@ $<
 
 $(DESTDIR)$(bindir)/%: bin/%
 	install -D $< $@
