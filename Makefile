@@ -57,7 +57,7 @@ bin: $(BINS)
 lib: $(LIBS)
 
 .PHONY: man
-man: $(MANS)
+man: $(MANS) README
 
 .PHONY: html
 html: $(HTMLS)
@@ -99,6 +99,10 @@ man/%.html: man/%.adoc
 .DELETE_ON_ERROR: man/%
 man/%: man/%.adoc
 	$(ASCIIDOCTOR) -b manpage -d manpage -o $@ $<
+
+.DELETE_ON_ERROR: README
+README: man/praxis.7
+	man $< | col -bx > $@
 
 $(DESTDIR)$(bindir)/%: bin/%
 	install -D $< $@
