@@ -1,7 +1,5 @@
 = praxis(7)
 :description: The package manager for Mutiny.
-:manmanual: Mutineer's Guide
-:mansource: Mutiny
 
 == Name
 

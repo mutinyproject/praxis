@@ -1,0 +1,67 @@
+'\" t
+.\"     Title: praxis
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.10
+.\"      Date: 2020-05-09
+.\"    Manual: Mutineer's Guide
+.\"    Source: Mutiny
+.\"  Language: English
+.\"
+.TH "PRAXIS" "7" "2020-05-09" "Mutiny" "Mutineer\(aqs Guide"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+praxis \- a package manager for Mutiny\(aqs package API, theory
+.SH "PHILOSOPHY"
+.sp
+Starting from the bottom\-up, \f(CRpraxis\fP aims to be composed of multiple small utilities that do one
+thing, so as to ease frontend development and more importantly, to make the surface area for issues
+very small. With this design in mind, \f(CRpraxis\fP can be fast and very compact, while providing a lot
+of useful functionality for developers, metadata consumers, and users.
+.sp
+No code evaluation is used at any point. All code is generated purely by following hierarchies of
+inheritance for actions (build scripts) and metadata.
+Concepts like \c
+.URL "https://skarnet.org/software/s6/s6\-envdir.html" "envdirs" " "
+are used to additionally ease
+the amount of parsing that must be done to files in order to construct metadata for packages,
+repositories, and libraries.
+.sp
+Furthermore, another goal is ensuring that it should be possible to get metadata from packages
+without having to call out to a shell running arbitrary code or duplicate metadata. This has tended
+to be a problem for other source\-based package formats, such as the Arch Linux AUR, Exherbo\(cqs
+exheres\-0, and Gentoo\(cqs EAPI.
+.SH "BUGS"
+.sp
+There\(cqs an IRC channel at \c
+.URL "irc://irc.freenode.net/#mutiny" "" "."
+Please don\(cqt hesitate to message if you
+have questions, bug reports, etc.
+.SH "SEE ALSO"
+.sp
+\fBmutiny\fP(7)
+.SH "LICENSE"
+.sp
+\fBpraxis\fP is in the public domain.
+.sp
+To the extent possible under law, Kylie McClain has waived all copyright and related or neighboring
+rights to this work.
+.sp
+.URL "http://creativecommons.org/publicdomain/zero/1.0/" "" ""

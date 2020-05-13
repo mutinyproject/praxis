@@ -23,6 +23,8 @@ INSTALLS := \
 
 ASCIIDOCTOR ?= asciidoctor
 ASCIIDOCTOR += --failure-level=WARNING -B $(PWD)
+ASCIIDOCTOR += -a manmanual="Mutineer's Guide"
+ASCIIDOCTOR += -a mansource="Mutiny"
 
 .PHONY: all
 all: bin lib man html
