@@ -7,7 +7,6 @@ enable=quote-safe-variables
 enable=avoid-nullary-conditions
 enable=check-unassigned-uppercase
 
-# SC2039 - The only extension of POSIX sh that we use is `local`, allow it.
-# SC1091 - False-positives due to use of @@.*@@ consts replaced during `make`.
-disable=SC2039
+# SC1090,SC1091 - False-positives due to use of @@.*@@ consts replaced during `make`.
+disable=SC1090
 disable=SC1091

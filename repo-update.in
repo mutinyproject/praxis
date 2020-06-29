@@ -17,6 +17,9 @@ while getopts :cdv arg >/dev/null 2>&1; do
             ;;
         d)
             dry_run=true
+
+            # This variable is used in idioms.
+            # shellcheck disable=SC2034
             _idioms_call_dry_run=true
             ;;
         v)
