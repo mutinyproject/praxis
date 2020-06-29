@@ -1,0 +1,9 @@
+= repo-update(1)
+
+== Name
+
+repo-update - update all installed repositories with their origins
+
+== Description
+
+TODO

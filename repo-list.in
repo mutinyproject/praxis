@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "@@libdir@@"/flow.sh
+. idioms
 
 # Ensure stable sort order.
 export LC_ALL=C
@@ -8,7 +8,7 @@ export LC_ALL=C
 libraries_only=false
 packages_only=false
 
-usage() { pdie "usage: %s [-lp]\n" "${0##*/}"; }
+myusage() { usage "repo-list [-lp]"; }
 
 while getopts :lp arg >/dev/null 2>&1; do
     case "${arg}" in
@@ -19,8 +19,8 @@ while getopts :lp arg >/dev/null 2>&1; do
             packages_only=true
             ;;
         ?)
-            perror "unknown argument -- %s\n" "${OPTARG}"
-            usage
+            error "unknown argument -- %s\n" "${OPTARG}"
+            myusage
             ;;
     esac
 done

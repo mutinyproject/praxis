@@ -1,0 +1,9 @@
+= repo-lint(1)
+
+== Name
+
+repo-lint - analyze a praxis(7) repository for issues
+
+== Description
+
+TODO

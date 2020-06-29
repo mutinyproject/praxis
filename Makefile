@@ -1,114 +1,130 @@
 name = praxis
 version = 20200121
 
-prefix ?=
-bindir ?= $(prefix)/bin
-libdir ?= $(prefix)/lib
-localstatedir ?= $(prefix)/var
-
-libdir := $(libdir)/$(name)
-
-builddir := $(localstatedir)/tmp/$(name)/build
-dbdir := $(localstatedir)/db/$(name)
-cachedir := $(localstatedir)/cache/$(name)
-
-BINS := $(patsubst %.in, %, $(wildcard bin/*.in))
-LIBS := $(patsubst %.in, %, $(wildcard lib/*.in))
-MANS := $(patsubst %.adoc, %, $(wildcard man/*.adoc))
-HTMLS := $(patsubst %.adoc, %.html, $(wildcard man/*.adoc))
-
-INSTALLS := \
-	$(addprefix $(DESTDIR)$(bindir)/,$(BINS:bin/%=%)) \
-	$(addprefix $(DESTDIR)$(libdir)/,$(LIBS:lib/%=%))
+prefix ?= /usr/local
+bindir ?= ${prefix}/bin
+datadir ?= ${prefix}/share
+libdir ?= ${prefix}/lib
+localstatedir ?= ${prefix}/var
+mandir ?= ${datadir}/man
+man1dir ?= ${mandir}/man1
+man3dir ?= ${mandir}/man3
 
 ASCIIDOCTOR ?= asciidoctor
-ASCIIDOCTOR += --failure-level=WARNING -B $(PWD)
-ASCIIDOCTOR += -a manmanual="Mutineer's Guide"
-ASCIIDOCTOR += -a mansource="Mutiny"
+ASCIIDOCTOR_FLAGS := --failure-level=WARNING
+ASCIIDOCTOR_FLAGS += -a manmanual="Mutineer's Guide - ${name}"
+ASCIIDOCTOR_FLAGS += -a mansource="Mutiny"
 
-.PHONY: all
-all: bin lib man html
+SHELLCHECK ?= shellcheck
+SHELLSPEC ?= shellspec
 
-.PHONY: clean
-clean:
-	rm -f $(BINS) $(LIBS) $(MANS) $(HTMLS)
+-include config.mk
 
-.PHONY: install
-install: $(INSTALLS)
-	mkdir -p $(DESTDIR)$(builddir)
-	mkdir -p $(DESTDIR)$(cachedir)
-	mkdir -p $(DESTDIR)$(cachedir)/distfiles
-	mkdir -p $(DESTDIR)$(dbdir)
-	mkdir -p $(DESTDIR)$(dbdir)/repositories
+libdir := ${libdir}/${name}
+builddir := ${localstatedir}/tmp/${name}/build
+dbdir := ${localstatedir}/db/${name}
+cachedir := ${localstatedir}/cache/${name}
 
-.PHONY: lint
-lint:
-	printf '%s\n' $(patsubst %,%.in,$(BINS)) $(patsubst %,%.in,$(LIBS)) | xargs shellcheck
+BINS = \
+    pkg-gen \
+    repo-lint \
+    repo-list \
+    repo-update \
+    theory-action \
+    theory-metadata
 
-.PHONY: test
-test: check
+LIBS = \
+    theory.sh
 
-.PHONY: check
-check: bin lib
-	shellspec $(SHELLSPEC_FLAGS)
+MAN1 = ${BINS:=.1}
+MAN3 = ${LIBS:.sh=.3}
+MAN7 = \
+    ${name}.7
 
-.PHONY: bin
-bin: $(BINS)
+MANS = ${MAN1} ${MAN3} ${MAN7}
 
-.PHONY: lib
-lib: $(LIBS)
+all: FRC ${BINS} ${LIBS} ${MANS}
+dev: FRC README all lint check
 
-.PHONY: man
-man: $(MANS) README
+bin: FRC ${BINS}
+lib: FRC ${LIBS}
+man: FRC ${MANS}
 
-.PHONY: html
-html: $(HTMLS)
+# NOTE: disable built-in rules which otherwise mess up creating .sh files
+.SUFFIXES:
 
-bin/%: bin/%.in
+# ${IDIOMS_LIBDIR} is used to allow for testing prior to installation.
+.SUFFIXES: .in
+.in:
 	sed \
-		-e "s|@@name@@|$(name)|g" \
-		-e "s|@@version@@|$(version)|g" \
-		-e "s|@@prefix@@|$(prefix)|g" \
-		-e "s|@@bindir@@|$(bindir)|g" \
-		-e "s|@@libdir@@|$$\{PRAXIS_LIBDIR:-$(libdir)\}|g" \
-		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
-		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
-		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
-		$< > $@.temp
-	chmod +x $@.temp
-	mv $@.temp $@
+	    -e "s|@@name@@|${name}|g" \
+	    -e "s|@@version@@|${version}|g" \
+	    -e "s|@@prefix@@|${prefix}|g" \
+	    -e "s|@@bindir@@|${bindir}|g" \
+	    -e "s|@@libdir@@|\$${PRAXIS_LIBDIR:-${libdir}}|g" \
+	    -e "s|@@mandir@@|${mandir}|g" \
+	    -e "s|@@man1dir@@|${man1dir}|g" \
+	    -e "s|@@man3dir@@|${man3dir}|g" \
+	    -e "s|@@man7dir@@|${man7dir}|g" \
+	    -e "s|@@localstatedir@@|${localstatedir}|g" \
+	    -e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-${builddir}\}|g" \
+	    -e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-${cachedir}\}|g" \
+	    -e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-${dbdir}\}|g" \
+	    $< > $@
+	chmod +x $@
 
-lib/%: lib/%.in
+.sh:
 	sed \
-		-e "s|@@name@@|$(name)|g" \
-		-e "s|@@version@@|$(version)|g" \
-		-e "s|@@prefix@@|$(prefix)|g" \
-		-e "s|@@bindir@@|$(bindir)|g" \
-		-e "s|@@libdir@@|$$\{PRAXIS_LIBDIR:-$(libdir)\}|g" \
-		-e "s|@@localstatedir@@|$(localstatedir)|g" \
-		-e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-$(builddir)\}|g" \
-		-e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-$(cachedir)\}|g" \
-		-e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-$(dbdir)\}|g" \
-		$< > $@.temp
-	chmod +x $@.temp
-	mv $@.temp $@
+	    -e "s|@@name@@|${name}|g" \
+	    -e "s|@@version@@|${version}|g" \
+	    -e "s|@@prefix@@|${prefix}|g" \
+	    -e "s|@@bindir@@|${bindir}|g" \
+	    -e "s|@@libdir@@|\$${PRAXIS_LIBDIR:-${libdir}}|g" \
+	    -e "s|@@mandir@@|${mandir}|g" \
+	    -e "s|@@man1dir@@|${man1dir}|g" \
+	    -e "s|@@man3dir@@|${man3dir}|g" \
+	    -e "s|@@man7dir@@|${man7dir}|g" \
+	    -e "s|@@localstatedir@@|${localstatedir}|g" \
+	    -e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-${builddir}\}|g" \
+	    -e "s|@@cachedir@@|$$\{PRAXIS_CACHEDIR:-${cachedir}\}|g" \
+	    -e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-${dbdir}\}|g" \
+	    $< > $@
 
-.DELETE_ON_ERROR: man/%.html
-man/%.html: man/%.adoc
-	$(ASCIIDOCTOR) -b html5 -o $@ $<
+.SUFFIXES: .adoc
+.adoc:
+	${ASCIIDOCTOR} ${ASCIIDOCTOR_FLAGS} -b manpage -d manpage -o $@ $<
 
-.DELETE_ON_ERROR: man/%
-man/%: man/%.adoc
-	$(ASCIIDOCTOR) -b manpage -d manpage -o $@ $<
+install: FRC all
+	install -d \
+	    ${DESTDIR}${bindir} \
+	    ${DESTDIR}${libdir} \
+	    ${DESTDIR}${mandir} \
+	    ${DESTDIR}${man1dir} \
+	    ${DESTDIR}${man3dir} \
+	    ${DESTDIR}${man7dir} \
+	    ${DESTDIR}${builddir} \
+	    ${DESTDIR}${cachedir} \
+	    ${DESTDIR}${cachedir}/distfiles \
+	    ${DESTDIR}${dbdir} \
+	    ${DESTDIR}${dbdir}/repositories
+
+	for bin in ${BINS}; do install -m0755 $${bin} ${DESTDIR}${bindir}; done
+	for lib in ${LIBS}; do install -m0644 $${lib} ${DESTDIR}${libdir}; done
+	for man1 in ${MAN1}; do install -m0644 $${man1} ${DESTDIR}${man1dir}; done
+	for man3 in ${MAN3}; do install -m0644 $${man3} ${DESTDIR}${man3dir}; done
+	for man7 in ${MAN7}; do install -m0644 $${man7} ${DESTDIR}${man7dir}; done
+
+clean: FRC
+	rm -f ${BINS} ${LIBS} ${MANS}
 
 .DELETE_ON_ERROR: README
-README: man/praxis.7
-	man $< | col -bx > $@
+README: ${name}.7
+	man ./$? | col -bx > $@
 
-$(DESTDIR)$(bindir)/%: bin/%
-	install -D $< $@
+lint: FRC ${BINS} ${LIBS}
+	${SHELLCHECK} ${BINS} ${LIBS}
 
-$(DESTDIR)$(libdir)/%: lib/%
-	install -D -m 0644 $< $@
+check: FRC ${BINS} ${LIBS}
+	${SHELLSPEC} ${SHELLSPEC_FLAGS}
 
+FRC:

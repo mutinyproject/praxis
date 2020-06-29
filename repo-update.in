@@ -1,9 +1,8 @@
 #!/bin/sh
 
-. "@@libdir@@"/flow.sh
-. "@@libdir@@"/text.sh
+. idioms
 
-usage() { pdie "usage: %s [-cdv] [REPOSITORY...]\n" "${0##*/}"; }
+myusage() { usage "repo-update [-cdv] [REPOSITORY...]"; }
 
 changes=false
 dry_run=false
@@ -18,6 +17,7 @@ while getopts :cdv arg >/dev/null 2>&1; do
             ;;
         d)
             dry_run=true
+            _idioms_call_dry_run=true
             ;;
         v)
             verbose=true
@@ -25,45 +25,44 @@ while getopts :cdv arg >/dev/null 2>&1; do
             git_quiet=
             ;;
         ?)
-            perror "unknown argument -- %s\n" "${OPTARG}"
-            usage
+            error "unknown argument -- ${OPTARG}"
+            myusage
             ;;
     esac
 done
-shift $((OPTIND - 1))
+shift $(( OPTIND - 1 ))
 
-pdo=
-"${verbose}" && pdo="pdo"
-"${dry_run}" && pdo="pdo -n"
+call=
+"${verbose}" && call="call"
 "${dry_run}" || [ -w "@@dbdir@@"/repositories ] ||
-    perror -d "can't write to repositories directory '%s'\n" "@@dbdir@@/repositories"
+    die 1 "can't write to repositories directory '@@dbdir@@/repositories'"
 
 cd "@@dbdir@@"/repositories ||
-    perror -d "can't change to repositories directory '%s'\n" "@@dbdir@@/repositories"
+    die 1 "can't change to repositories directory '@@dbdir@@/repositories'"
 
 # We want to split on words here. Whitespace is not allowed a repository name.
 # shellcheck disable=SC2046
 [ $# -gt 0 ] || set -- $(repo-list)
 
 while [ $# -gt 0 ]; do
-    [ -d "${1}" ] || perror -d "'%s' is not a repository\n" "${1}"
+    [ -d "${1}" ] || die 1 "'${1}' is not a repository"
 
     if [ -x "${1}"/.git ] && [ -d "${1}"/.git ]; then
         repo_branch=$(git -C "${1}" rev-parse --abbrev-ref HEAD)
-        ${pdo} git -C "${1}" fetch ${git_quiet:+-q} ${git_verbose:+-v} origin "${repo_branch}"
+        ${call} git -C "${1}" fetch ${git_quiet:+-q} ${git_verbose:+-v} origin "${repo_branch}"
 
         if "${changes}" && [ "$(git -C "${1}" log --oneline '..@{u}' | wc -l)" -gt 0 ]; then
             before_date=$(git -C "${1}" show -s --format=%cd --date=human-local HEAD)
             printf 'Changes in %s since %s:\n' "${1}" "${before_date}"
-            PAGER='cat' ${pdo} git -C "${1}" log \
+            PAGER='cat' ${call} git -C "${1}" log \
                 --reverse \
                 --format="$(printf '\t%s' '%C(yellow)%h%C(reset) %s (%aN <%aE>)')" \
                 '..@{u}'
         fi
 
-        ${pdo} git -C "${1}" reset --hard ${git_quiet:+-q} origin/"${repo_branch}"
+        ${call} git -C "${1}" reset --hard ${git_quiet:+-q} origin/"${repo_branch}"
     else
-        pwarning "unsure of how to update '%s'\n" "${1}"
+        warn "unsure of how to update '${1}'"
     fi
 
     shift
@@ -74,7 +73,7 @@ for repo in $(repo-list -l | tac); do
 done
 
 if [ "$#" -gt 0 ]; then
-    ${pdo} s6-update-symlinks "@@dbdir@@/libraries" "$@"
+    ${call} s6-update-symlinks "@@dbdir@@/libraries" "$@"
 fi
 
 for repo in $(repo-list -p | tac); do
@@ -82,5 +81,5 @@ for repo in $(repo-list -p | tac); do
 done
 
 if [ "$#" -gt 0 ]; then
-    ${pdo} s6-update-symlinks "@@dbdir@@/packages" "$@"
+    ${call} s6-update-symlinks "@@dbdir@@/packages" "$@"
 fi

@@ -1,11 +1,22 @@
-bin/*
-lib/*.sh
-lib/public/*
+# BINS
+pkg-gen
+pkg-make
+repo-lint
+repo-list
+repo-update
+theory-action
+theory-metadata
 
-!bin/*.in
-!lib/public/*.in
+# LIBS
+theory.sh
+
+# PUBLICS
+public
 
 # These should be generated during the `repo-update` tests.
 spec/testdata/db/libraries
 spec/testdata/db/packages
 
+# etc.
+
+config.mk

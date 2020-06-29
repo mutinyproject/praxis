@@ -1,0 +1,9 @@
+= theory-metadata(1)
+
+== Name
+
+theory-metadata - print all metadata of a theory
+
+== Description
+
+TODO

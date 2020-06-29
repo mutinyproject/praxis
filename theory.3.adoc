@@ -1,0 +1,9 @@
+= theory(3)
+
+== Name
+
+theory - overview of a theory package file
+
+== Synopsis
+
+TODO

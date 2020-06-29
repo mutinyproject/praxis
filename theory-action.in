@@ -1,10 +1,9 @@
 #!/bin/sh
 
-. "@@libdir@@"/flow.sh
+. idioms
 . "@@libdir@@"/theory.sh
-. "@@libdir@@"/text.sh
 
-usage() { pdie "usage: %s [-r] THEORY...\n" "${0##*/}"; }
+myusage() { usage "theory-action [-r] THEORY..."; }
 
 recurse=false
 while getopts :r arg >/dev/null 2>&1; do
@@ -13,17 +12,19 @@ while getopts :r arg >/dev/null 2>&1; do
             recurse=true
             ;;
         ?)
-            perror "unknown argument -- %s\n" "${OPTARG}"
-            usage
+            error "unknown argument -- ${OPTARG}"
+            myusage
             ;;
     esac
 done
-shift $((OPTIND - 1))
+shift $(( OPTIND - 1 ))
 
-[ "$#" -eq 0 ] && usage
+[ "$#" -eq 0 ] && myusage
 
 while [ "$#" -gt 0 ]; do
-    is_theory_dir "${1}" || perror -d "'%s' is not a directory containing a package or library\n" "${1}"
+    if ! is_theory_dir "${1}"; then
+        die 2 "'${1}' is not a directory containing a package or library"
+    fi
 
     if "${recurse}" && [ -r "${1}"/libraries ]; then
         # TODO(somasis): arguments are not used for anything yet.
@@ -34,10 +35,10 @@ while [ "$#" -gt 0 ]; do
     fi
 
     if test -r "${1}"/action -a -s "${1}"/action; then
-        sh -n "${1}"/action || perror -d "syntax error in '%s', dying\n" "${1}/action"
+        sh -n "${1}"/action && die 3 "syntax error in '${1}/action', dying"
         cat "${1}"/action
     else
-        exit 0
+        exit
     fi
 
     shift

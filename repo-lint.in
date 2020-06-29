@@ -1,0 +1,55 @@
+#!/bin/sh
+
+. idioms
+
+myusage() { usage "repo-lint [-v] [DIRECTORY ...]"; }
+
+verbose=false
+
+while getopts :v arg >/dev/null 2>&1; do
+    case "${arg}" in
+        v)
+            verbose=true
+            ;;
+        ?)
+            error "unknown argument -- ${OPTARG}"
+            myusage
+            ;;
+    esac
+done
+shift $(( OPTIND - 1 ))
+
+multitest() {
+    multitest_f="${1}"; shift
+    while [ $# -gt 0 ]; do
+        test "${multitest_f}" || return $?
+        shift
+    done
+}
+
+empty() {
+    has_whitespace "$(printf %s "$(cat "${1}" 2>/dev/null)")"
+}
+
+while [ $# -gt 0 ]; do
+    "${verbose}" && note "checking '${1}'..."
+
+    {
+        has_whitespace "${1}" && error "repository names may not have any whitespace"
+
+        for should_exist in "${1}" "${1}"/metadata; do
+            multitest "${should_exist}" -d -x ||
+                error "directory '${should_exist}' should exist and be accessible"
+        done
+
+        for should_exist in "${1}"/metadata/description "${1}"/metadata/priority; do
+            { multitest "${should_exist}" -e -r && ! empty "${should_exist}"; } ||
+                error "file '${should_exist}' should exist, be readable, and not be empty"
+        done
+
+        priority="$(cat "${1}"/metadata/priority 2>/dev/null)"
+        test "${priority}" -ge 0 -a "${priority}" -le 3 ||
+            error "priority '${priority}' must be >=0 && <=3"
+    } 2>&1 | sed "$(printf 's/^/\t/g')" >&2
+    shift
+done
