@@ -2,7 +2,7 @@
 
 == Name
 
-repo-lint - analyze a praxis(7) repository for issues
+repo-lint - analyze a theory repository for issues
 
 == Description
 
