@@ -40,7 +40,7 @@ Describe "repo-list"
 
     It "will error out if you give it an unknown argument"
         When call repo-list -z
-        The status should eq 1
+        The status should eq 22
         The lines of the entire stderr should eq 2
         The first line of stderr should eq 'error: unknown argument -- z'
     End
