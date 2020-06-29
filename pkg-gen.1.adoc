@@ -7,3 +7,5 @@ pkg-gen - generate self-contained scripts for building packages
 == Description
 
 TODO
+
+include::footer.adoc[]

@@ -7,3 +7,5 @@ repo-list - list all installed repositories
 == Description
 
 TODO
+
+include::footer.adoc[]

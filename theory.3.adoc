@@ -7,3 +7,5 @@ theory - overview of a theory package file
 == Synopsis
 
 TODO
+
+include::footer.adoc[]

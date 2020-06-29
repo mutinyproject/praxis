@@ -7,3 +7,5 @@ repo-lint - analyze a praxis(7) repository for issues
 == Description
 
 TODO
+
+include::footer.adoc[]

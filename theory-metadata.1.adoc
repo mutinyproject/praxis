@@ -7,3 +7,5 @@ theory-metadata - print all metadata of a theory
 == Description
 
 TODO
+
+include::footer.adoc[]
