@@ -1,18 +1,8 @@
 = praxis(7)
-:description: The package manager for Mutiny.
 
 == Name
 
-ifdef::backend-html5[]
-*praxis* - a package manager for https://mutiny.zone[Mutiny]'s package API, `theory`
-
-[link=https://builds.sr.ht/~somasis/praxis]
-image::https://builds.sr.ht/~somasis/praxis.svg[sourcehut build status]
-
-endif::[]
-ifdef::backend-manpage[]
 praxis - a package manager for Mutiny's package API, theory
-endif::[]
 
 == Philosophy
 
