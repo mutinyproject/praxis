@@ -286,3 +286,5 @@ are ran.
 The directories in which a build is executed are undefined. However, it is a good idea to use
 something located in a good location for temporary work. A directory in `/var/tmp` is a good idea;
 `/tmp`, not so much, as build directories *should* be allowed to persist for long periods of time.
+
+include::footer.adoc[]
