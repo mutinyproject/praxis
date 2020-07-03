@@ -1,5 +1,4 @@
 = praxis-design(7)
-Kylie J. McClain <kylie@somas.is>
 
 == Name
 
