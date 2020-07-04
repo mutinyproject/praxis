@@ -110,7 +110,7 @@ html: FRC ${HTMLS}
 	${ASCIIDOCTOR} ${ASCIIDOCTOR_FLAGS} -b manpage -d manpage -o $@ $<
 
 install-html: FRC ${HTMLS}
-	install -d ${htmldir}
+	install -d ${DESTDIR}${htmldir}
 	for html in ${HTMLS}; do install -m0644 $${html} ${DESTDIR}${htmldir}; done
 
 install: FRC all
