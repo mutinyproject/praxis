@@ -1,0 +1,647 @@
+'\" t
+.\"     Title: theory
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.10
+.\"      Date: 2020-07-04
+.\"    Manual: Mutineer's Guide - praxis
+.\"    Source: Mutiny
+.\"  Language: English
+.\"
+.TH "THEORY" "5" "2020-07-04" "Mutiny" "Mutineer\(aqs Guide \- praxis"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+theory \- package API used by Mutiny
+.SH "SYNOPSIS"
+.sp
+This document aims to explain the API available for writing packages for Mutiny. This should be
+considered the definitive document to consult when writing packages, or when developing package
+managers.
+.SH "REPOSITORIES"
+.sp
+Package managers \fBmust\fP support multiple repositories. The internal prioritization of these
+repositories is dictated by the [priority]. User\-facing sort (ex. when listing repositories
+installed on the system) is not defined.
+.sp
+Repository names are alphanumeric plus \f(CR_\fP and \f(CR\-\fP.
+.sp
+The file and directory layout of a valid repository is as follows, \fIitalicized\fP items representing
+optional items, anything else required:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+<repository name>/
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+metadata/
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIdependencies\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIsummary\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+priority
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIlibraries\fP/
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+library1
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+packages/
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+openssh#1.2.3/ \- This directory\(cqs path is exported as \f(CR${PKGDIR}\fP.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIdependencies\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIlibraries\fP \- Libraries to be used for constructing the package\(cqs theory.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIsha256sum\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIsources\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+theory0
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fImetadata/\fP \- All files under this directory are exported as environment variables
+after importing all libraries.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIHOMEPAGE\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fILICENSES\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fISUMMARY\fP
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIfiles/\fP \- This directory\(cqs path is exported as \f(CR${FILES}\fP.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIpatches/\fP
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\fIopenssh\-1.2.3\-backport.patch\fP
+.RE
+.RE
+.RE
+.RE
+.RE
+.RE
+.SS "Repository metadata"
+.sp
+Repositories \fBmust\fP have a directory in their root named \f(CRmetadata\fP.
+.SS "Dependencies (optional)"
+.sp
+Repositories \fBmay\fP contain a file in \f(CRmetadata\fP, named \f(CRdependencies\fP. The \f(CRdependencies\fP file \fBmust\fP
+contain a single repository on each line. Repositories listed in this file are repositories which the
+package manager \fBmust\fP have installed prior to the installation of the repository depending on them.
+The order in which they are listed is unspecified.
+.sp
+Any repository listed will have its \f(CRlibraries\fP directory searched when parsing package files; the order
+in which they are searched is determined by the \f(CRpriority\fP value of the repository.
+.sp
+Do not add repositories to \f(CRdependencies\fP simply because a package in your repository depends on something
+in another repository. The package manager \fBshall\fP deal with determining what repository needs to be
+installed to satisfy a dependency through usage of the \c
+.URL "#universe" "\f(CRuniverse\fP meta\-repository" "."
+.SS "Summary"
+.sp
+Repositories \fBshould\fP have a summary. The summary should be a short, one\-line blurb describing the
+repository\(cqs contents or objective.
+.SS "Priority"
+.sp
+Repositories \fBmust\fP have a file within \f(CRmetadata\fP named \f(CRpriority\fP.
+The \f(CRpriority\fP file \fBmust\fP contain a non\-negative integer.
+.sp
+The intended scheme goes like so:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 1." 4.2
+.\}
+First\-party primary repository, over which nothing has a greater priority
+There should only be one repository with this level. (ex. Base packages for a system.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 2." 4.2
+.\}
+First\-party secondary repository (such as a supplementary repository).
+(ex. Repositories containing software categories or projects; GNOME, KDE...)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 3." 4.2
+.\}
+First\-party tertiary repository. (ex. A distribution developer\(cqs repository.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 4." 4.2
+.\}
+Third\-party repository. (ex. A distribution user\(cqs repository.)
+.RE
+.SS "Packages"
+.sp
+Repositories \fBshould\fP contain a directory named \f(CRpackages\fP; if they do not, package managers \fBmay\fP
+ignore them entirely, as there\(cqs not much use to a repository with no package.
+.SS "Package specifications"
+.sp
+Package specifications (informally referred to as "specs") are strings which describe a package.
+.sp
+Specifications take on multiple permutations, because they are made up of four different parts, of
+which only the name is required.
+.sp
+Given the fully\-qualified spec \f(CRpackage#1.0::repository\fP...
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Package name (\f(CRpackage\fP)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Package version (\f(CR1.0\fP)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Package repository (\f(CRrepository\fP)
+.RE
+.sp
+For a package spec to be valid, it \fBmust\fP match the regex
+\f(CR((^[A\-Za\-z](?:[A\-Za\-z0\-9_+\-]*)?)(#[a\-z0\-9\(rs._\-]+)?(::[A\-Za\-z0\-9_\-]+)?|\(rs*)\fP.
+.sp
+Breaking it down:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Package name is alphanumeric, plus \f(CR_\fP, \f(CR+\fP, and \f(CR\-\fP. It must start with an alphanumeric.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Package version is numeric plus \f(CR.\fP, \f(CR_\fP, \f(CR\-\fP, and lowercase alpha
+characters. (for \f(CRr1\fP, etc.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Repository is alphanumeric plus \f(CR_\fP, and \f(CR\-\fP. It must start with an alphanumeric.
+.RE
+.sp
+All parts of a package spec are case\-sensitive.
+.SS "Disambiguation"
+.sp
+The only strictly \fBrequired\fP part of a spec is the inclusion of the
+package name. If any other part other than the name is omitted, it will
+be disambiguated in order to determine what packages can satisfy the
+specification given.
+.sp
+If more than one package matches a specification, the package manager
+\fBmay\fP prompt the user in some fashion to be more specific.
+.SS "Format"
+.sp
+\f(CRtheory0\fP files and \f(CRlib0\fP files are effectively just shell scripts. Package managers \fBshould\fP
+avoid locking the user into any particular Bourne\-style shell implementation; as such, the format
+of these files should adhere to shell syntax as defined in
+.URL "http://pubs.opengroup.org/onlinepubs/9699919799/" "POSIX 2016" "."
+.sp
+That said, a few exceptions are made for functionality that is deemed too
+useful to be given up, and isn\(cqt yet specified in POSIX...
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Declaring arrays (\f(CRarray=( "foo" "bar" "baz" )\fP)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Iterating through arrays (\f(CRfor item in "${array[@]}";do ... done\fP)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Appending to arrays (\f(CRarray+=( "xyzzy" )\fP)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Local\-scope variables (\f(CRlocal var="value"\fP)
+.RE
+.SH "BUILD ENVIRONMENT"
+.sp
+When referring to a "build environment", this document is referring to the literal shell environment
+which the shell process is running in. This means it consists of things such as variables,
+functions, and current working directory.
+.SS "Phases"
+.sp
+Everything in this section is \fBrequired\fP of any package manager implementation.
+.sp
+"By default" refers to a package which does not define any phases or import any libraries which
+define phases.
+.sp
+Note the difference between "not defined" and "does nothing". Packages \fBmust\fP have each phase
+defined, regardless of if they have any function; if a phase listed here is not defined by either
+the package manager, or the package (or a library used by the package), the package manager \fBmust\fP
+error out and fail, because that is an invalid package.
+.sp
+"Does nothing" would mean something like \f(CRpkg_init() { true; }\fP. "Not defined" would mean no
+definition of the function.
+(ex. Attempting to run function that is not defined would give an unknown command error)
+.SS "\f(CRpkg_init()\fP"
+.sp
+This phase is ran when a build environment is created for a package building session. Normally
+nothing is done, and this is a dummy function.
+.sp
+Examples of other defintions could be creating a custom \f(CRPATH\fP and script wrappers to be used for
+build systems that are stubborn to cooperate with cross\-compilation.
+.SS "\f(CRsrc_fetch()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to get any sources needed to make the package being built. By default it
+downloads any unretrieved files specified in the \c
+.URL "#Downloads" "\f(CRDOWNLOADS\fP" " "
+metadata, and then
+verifies the files match the checksums specified in the \f(CRsha256sum\fP metadata.
+.sp
+Usually you will not need to change this.
+.sp
+Examples of other definitions could include retrieval of \f(CRgit\fP sources, \f(CRhg\fP, \f(CRcvs\fP, etc.
+.SS "\f(CRsrc_unpack()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to unpack any files retrived during \f(CRsrc_fetch()\fP. By default this means
+it will extract any archives downloaded into the [Build directory], and then change into the
+[Work directory].
+.sp
+Examples of other definitions could include checking out \f(CRgit\fP sources into \f(CRWORK\fP, or similar.
+.SS "\f(CRsrc_prepare()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to prepare the package for the real build process; so, things which are
+normally done before building, like applying patches, generating Autotools scripts, etc. are to be
+done here.
+.sp
+By default it does nothing.
+.SS "\f(CRsrc_configure()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run package configuration\-related steps of the build process. Things
+like \f(CR./configure\fP, \f(CRcmake\fP, or writing build configuration files would be done here.
+.sp
+By default it is not defined.
+.sp
+The rationale behind not providing a default definition is that it allows for more flexibility and
+less package manager dependent functionality. Rather than putting a default definition that, say,
+expects an Autotools like package, and putting that functionality in the package manager, it can be
+done with libraries.
+.SS "\f(CRsrc_compile()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run the compilation process for the package.
+Things like \f(CRmake\fP, \f(CRninja\fP, etc. would be done here.
+.sp
+By default it is not defined.
+.SS "\f(CRsrc_test()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run tests for the package being built. Things
+like \f(CRmake check\fP, \f(CRctest\fP, \f(CR./setup.py test\fP, etc. are done here.
+.sp
+By default it is not defined. This phase is special in that the package manager \fBshould\fP make note
+of this phase not being defined. The package manager \fBshould not\fP fail when \f(CRsrc_test()\fP is
+undefined; at least, not by default. Failing may be useful for quality assurance purposes.
+.SS "\f(CRsrc_install()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run the installation for the package; so, commands like
+\f(CRmake install DESTDIR="${IMAGE}"\fP.
+.sp
+Under no circumstances should anything in this phase touch something outside the build environment.
+The package manager will merge files from the package to the system, and the build process \fBmay\fP not
+even have access to the system anyway, instead being built in a chroot or a sandbox of some sort.
+.sp
+By default it is not defined.
+.SS "\f(CRpkg_premerge()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run any commands that are required to be ran on the system itself before
+the package is merged.
+.sp
+By default it does nothing.
+.SS "\f(CRpkg_postmerge()\fP"
+.sp
+\fBOnly ran during installation.\fP
+.sp
+This phase\(cqs purpose is to run any commands that are required to be ran on the system itself after
+the package is merged.
+.sp
+(ex. Updating icon caches, displaying important information after a major package upgrade, ...)
+.sp
+By default it does nothing.
+.SS "Directories"
+.sp
+The only requirements of the directory in which a package build is executed is that it is read\-write
+accessable by the package manager, and that the work directory be entirely empty before any phases
+are ran.
+.sp
+The directories in which a build is executed are undefined. However, it is a good idea to use
+something located in a good location for temporary work. A directory in \f(CR/var/tmp\fP is a good idea;
+\f(CR/tmp\fP, not so much, as build directories \fBshould\fP be allowed to persist for long periods of time.
+.SH "CONTRIBUTING"
+.sp
+The canonical URL of this repository is \c
+.URL "https://git.mutiny.red/mutiny/praxis" "" "."
+Submit patches and bugs to <\c
+.MTO "kylie\(atsomas.is" "" ">."
+.sp
+There is also an IRC channel for \fBpraxis\fP and other projects at \c
+.URL "irc://irc.freenode.net/#mutiny" "" "."
+Please don\(cqt hesitate to message if you need help.
+.SH "LICENSE"
+.sp
+\fBpraxis\fP is in the public domain.
+.sp
+To the extent possible under law, Kylie McClain <\c
+.MTO "kylie\(atsomas.is" "" ">"
+has waived all copyright and
+related or neighboring rights to this work.
+.sp
+.URL "http://creativecommons.org/publicdomain/zero/1.0/" "" ""
