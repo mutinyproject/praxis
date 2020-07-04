@@ -12,6 +12,7 @@ localstatedir ?= ${prefix}/var
 mandir ?= ${datadir}/man
 man1dir ?= ${mandir}/man1
 man3dir ?= ${mandir}/man3
+man7dir ?= ${mandir}/man7
 
 ASCIIDOCTOR ?= asciidoctor
 ASCIIDOCTOR_FLAGS += --failure-level=WARNING
