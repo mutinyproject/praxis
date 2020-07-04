@@ -3,7 +3,10 @@ version = 20200121
 
 prefix ?= /usr/local
 bindir ?= ${prefix}/bin
-datadir ?= ${prefix}/share
+datarootdir ?= ${prefix}/share
+datadir ?= ${datarootdir}
+docdir ?= ${datadir}/doc/${name}
+htmldir ?= ${docdir}
 libdir ?= ${prefix}/lib
 localstatedir ?= ${prefix}/var
 mandir ?= ${datadir}/man
@@ -42,6 +45,7 @@ MAN7 = \
     ${name}.7
 
 MANS = ${MAN1} ${MAN3} ${MAN7}
+HTMLS = ${MANS:=.html}
 
 all: FRC ${BINS} ${LIBS} ${MANS}
 dev: FRC README all lint check
@@ -49,6 +53,7 @@ dev: FRC README all lint check
 bin: FRC ${BINS}
 lib: FRC ${LIBS}
 man: FRC ${MANS}
+html: FRC ${HTMLS}
 
 # NOTE: disable built-in rules which otherwise mess up creating .sh files
 .SUFFIXES:
@@ -90,9 +95,17 @@ man: FRC ${MANS}
 	    -e "s|@@dbdir@@|$$\{PRAXIS_DBDIR:-${dbdir}\}|g" \
 	    $< > $@
 
-.SUFFIXES: .adoc
-.adoc:
+.SUFFIXES: .adoc .html
+
+.adoc.html: footer.adoc
+	${ASCIIDOCTOR} ${ASCIIDOCTOR_FLAGS} -b html5 -o $@ $<
+
+.adoc: footer.adoc
 	${ASCIIDOCTOR} ${ASCIIDOCTOR_FLAGS} -b manpage -d manpage -o $@ $<
+
+install-html: FRC ${HTMLS}
+	install -d ${htmldir}
+	for html in ${HTMLS}; do install -m0644 $${html} ${DESTDIR}${htmldir}; done
 
 install: FRC all
 	install -d \
@@ -115,7 +128,7 @@ install: FRC all
 	for man7 in ${MAN7}; do install -m0644 $${man7} ${DESTDIR}${man7dir}; done
 
 clean: FRC
-	rm -f ${BINS} ${LIBS} ${MANS}
+	rm -f ${BINS} ${LIBS} ${MANS} ${HTMLS}
 
 .DELETE_ON_ERROR: README
 README: ${name}.7
