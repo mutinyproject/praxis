@@ -13,6 +13,9 @@ theory.sh
 # PUBLICS
 public
 
+# HTMLS
+*.html
+
 # These should be generated during the `repo-update` tests.
 spec/testdata/db/libraries
 spec/testdata/db/packages
