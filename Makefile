@@ -40,6 +40,9 @@ BINS = \
 LIBS = \
     theory.sh
 
+PUBLICS = \
+    action.in
+
 MAN1 = ${BINS:=.1}
 MAN7 = \
     ${name}.7
@@ -111,6 +114,7 @@ install: FRC all
 	install -d \
 	    ${DESTDIR}${bindir} \
 	    ${DESTDIR}${libdir} \
+	    ${DESTDIR}${libdir}/public \
 	    ${DESTDIR}${man1dir} \
 	    ${DESTDIR}${man3dir} \
 	    ${DESTDIR}${man7dir} \
@@ -122,6 +126,7 @@ install: FRC all
 
 	for bin in ${BINS}; do install -m0755 $${bin} ${DESTDIR}${bindir}; done
 	for lib in ${LIBS}; do install -m0644 $${lib} ${DESTDIR}${libdir}; done
+	for public in ${PUBLICS}; do install -m0644 $${public} ${DESTDIR}${libdir}/public
 	for man1 in ${MAN1}; do install -m0644 $${man1} ${DESTDIR}${man1dir}; done
 	for man3 in ${MAN3}; do install -m0644 $${man3} ${DESTDIR}${man3dir}; done
 	for man7 in ${MAN7}; do install -m0644 $${man7} ${DESTDIR}${man7dir}; done
