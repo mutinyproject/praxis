@@ -51,7 +51,7 @@ MANS = ${MAN1} ${MAN3} ${MAN7}
 HTMLS = ${MANS:=.html}
 
 all: FRC ${BINS} ${LIBS} ${MANS}
-dev: FRC README all lint check
+dev: FRC README all html lint check
 
 bin: FRC ${BINS}
 lib: FRC ${LIBS}
