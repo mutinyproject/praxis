@@ -111,7 +111,6 @@ install: FRC all
 	install -d \
 	    ${DESTDIR}${bindir} \
 	    ${DESTDIR}${libdir} \
-	    ${DESTDIR}${mandir} \
 	    ${DESTDIR}${man1dir} \
 	    ${DESTDIR}${man3dir} \
 	    ${DESTDIR}${man7dir} \
