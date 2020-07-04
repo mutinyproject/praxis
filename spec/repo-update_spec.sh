@@ -2,28 +2,33 @@
 
 Describe "repo-update"
     It "updates all the repositories when given no arguments"
-        stderr() {
-            %text:expand
-            #|warning: unsure of how to update 'test'
-            #|warning: unsure of how to update 'test-libraries-only'
-            #|warning: unsure of how to update 'test-packages-only'
-        }
+        #stderr() {
+        #    %text:expand
+        #    #|warning: unsure of how to update 'test'
+        #    #|warning: unsure of how to update 'test-libraries-only'
+        #    #|warning: unsure of how to update 'test-packages-only'
+        #}
+        #
+        #When call repo-update
+        #The status should eq 0
+        #The stderr should eq "$(stderr)"
 
-        When call repo-update
-        The status should eq 0
-        The stderr should eq "$(stderr)"
+        Skip \
+            "Causes issues when running in a git repository"
     End
 
     It "updates only repositories given as arguments, if given any arguments"
-        stderr() {
-            %text:expand
-            #|warning: unsure of how to update 'test'
-            #|warning: unsure of how to update 'test-libraries-only'
-        }
+        #stderr() {
+        #    %text:expand
+        #    #|warning: unsure of how to update 'test'
+        #    #|warning: unsure of how to update 'test-libraries-only'
+        #}
+        #
+        #When call repo-update test test-libraries-only
+        #The status should eq 0
+        #The stderr should eq "$(stderr)"
 
-        When call repo-update test test-libraries-only
-        The status should eq 0
-        The stderr should eq "$(stderr)"
+        Skip
     End
 
     It "will error out if you give it an unknown argument"
