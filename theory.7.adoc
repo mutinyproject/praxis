@@ -10,10 +10,6 @@ This document aims to explain the API available for writing packages for Mutiny.
 considered the definitive document to consult when writing packages, or when developing package
 managers.
 
-The key words "must", "must not", "required", "shall", "shall not", "should", "should not",
-"recommended", "may", and "optional" in this document are to be interpreted as described in
-https://tools.ietf.org/html/rfc2119[RFC 2119].
-
 == Repositories
 
 Package managers *must* support multiple repositories. The internal prioritization of these
