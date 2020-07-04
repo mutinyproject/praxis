@@ -28,12 +28,15 @@
 .  LINKSTYLE blue R < >
 .\}
 .SH "NAME"
-praxis \- a package manager for Mutiny\(aqs package API, theory
+praxis \- package manager for Mutiny\(aqs package API, theory
+.SH "SYNOPSIS"
+.sp
+This page consists of documentation and other notes on the design of the \fBpraxis\fP package manager.
 .SH "PHILOSOPHY"
 .sp
-Starting from the bottom\-up, \f(CRpraxis\fP aims to be composed of multiple small utilities that do one
+Starting from the bottom\-up, \fBpraxis\fP aims to be composed of multiple small utilities that do one
 thing, so as to ease frontend development and more importantly, to make the surface area for issues
-very small. With this design in mind, \f(CRpraxis\fP can be fast and very compact, while providing a lot
+very small. With this design in mind, \fBpraxis\fP can be fast and very compact, while providing a lot
 of useful functionality for developers, metadata consumers, and users.
 .sp
 No code evaluation is used at any point. All code is generated purely by following hierarchies of
@@ -47,7 +50,431 @@ repositories, and libraries.
 Furthermore, another goal is ensuring that it should be possible to get metadata from packages
 without having to call out to a shell running arbitrary code or duplicate metadata. This has tended
 to be a problem for other source\-based package formats, such as the Arch Linux AUR, Exherbo\(cqs
-exheres\-0, and Gentoo\(cqs EAPI.
+exheres\-0, and Gentoo\(cqs EAPI. That is to say, it should be relatively static and not actually
+require a shell parser for anything other than running the actual actions that build a package.
+.SH "DEPENDENCIES"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+.URL "https://git.mutiny.red/mutiny/idioms" "\f(CRidioms\fP" ""
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+A POSIX\-compliant shell
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+.URL "https://skarnet.org/software/s6\-portable\-utils" "\f(CRs6\-portable\-utils\fP" ""
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRs6\-update\-symlinks\fP is used for updating repositories while respecting priority.
+.RE
+.RE
+.SH "ROADMAP"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Build repository management utilities
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRrepo\-list\fP \- list all repositories by if they have libraries and/or packages.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRrepo\-update\fP \- update repositories and combine them according to priority.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests (currently are skipped until things settle)
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRrepo\-lint\fP \- lint repositories and check their validity according to theory(5).
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Build theory construction utilities
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRtheory\-action\fP \- resolve and print all action (build script) parts of a theory.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRtheory\-metadata\fP \- resolve and print all metadata parts of a theory.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Open questions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 1." 4.2
+.\}
+Should packages be created by concatenation of things, which creates a mostly
+self\-contained and perhaps easier\-debugged build script, or should they be parsed more
+heavily by the package manager itself? This needs to be decided pretty soon since it
+basically dictates the rest of the format.
+.RE
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Build package building utilities
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRpkg\-gen\fP \- create a self\-contained package script.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+See the first open question above to understand my anxieties with this format.
+.RE
+.RE
+.RE
+.SH "WISHLIST"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Multiple repositories
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Intra\-repository dependencies
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Priority levels
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CR::mutiny\fP is the most important repository.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Other repositories should always be able to depend on libraries in repositories that
+are have a higher priority.
+.RE
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Repository synchronization
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Use \fBgit\fP for synchronization by default, but allow alternative transport/sync methods.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Paludis has sync prefixes: \f(CRcave sync \-s local repository\fP, which are really useful for
+fast development of repositories and packages within them.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Something akin to \f(CRapt\-get source\fP would be pretty nice \- we have all the metadata to do just
+this anyway, since all packages are built from source.
+.RE
+.SS "Example configuration"
+.sp
+Here\(cqs what I\(cqm imagining for the configuration format. Basically, something akin to Paludis\(aq
+configuration format, but simpler.
+.SS "\fI/etc/praxis/options.conf\fP"
+.sp
+Options enabled on packages.
+.sp
+.if n .RS 4
+.nf
+*           \-* ruby ssl
+tz          leaps
+toybox      static
+nginx       webdav pcre
+.fi
+.if n .RE
+.sp
+Files may also be put in \fI/etc/praxis/options.d/*.conf\fP, and they\(cqll take priority over
+\fIoptions.conf\fP.
+.SS "\fI/etc/praxis/world\fP"
+.sp
+Packages explicitly requested to be installed by the user. They were not installed as dependencies
+of other packages.
+.sp
+.if n .RS 4
+.nf
+beets
+lighttpd
+mpd
+passage
+.fi
+.if n .RE
+.SH "GLOSSARY"
+.sp
+actions
+.RS 4
+The actual executable code used to build a package.
+.RE
+.sp
+theory
+.RS 4
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 1." 4.2
+.\}
+The package API. See theory(5).
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 2." 4.2
+.\}
+A directory containing the data used to build a package. A directory contains a package if it
+has either an action, or a library (which creates actions).
+.RE
+.RE
+.SH "ETYMOLOGY"
+.sp
+Named as such to conform with the rest of the Mutiny naming scheme. "Praxis," the word, means in the
+original Greek, "action." Packages are referred to as theories, thus praxis carries out a
+theory(3). \f(CRpraxis\fP is the reference implementation of the package manager used by mutiny(7).
+.SH "SEE ALSO"
+.sp
+theory(5)
 .SH "CONTRIBUTING"
 .sp
 The canonical URL of this repository is \c
