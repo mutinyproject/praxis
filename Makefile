@@ -11,7 +11,7 @@ libdir ?= ${prefix}/lib
 localstatedir ?= ${prefix}/var
 mandir ?= ${datadir}/man
 man1dir ?= ${mandir}/man1
-man3dir ?= ${mandir}/man3
+man5dir ?= ${mandir}/man5
 man7dir ?= ${mandir}/man7
 
 ASCIIDOCTOR ?= asciidoctor
@@ -44,10 +44,13 @@ PUBLICS = \
     action.in
 
 MAN1 = ${BINS:=.1}
+MAN5 = \
+    theory.5
+
 MAN7 = \
     ${name}.7
 
-MANS = ${MAN1} ${MAN3} ${MAN7}
+MANS = ${MAN1} ${MAN5} ${MAN7}
 HTMLS = ${MANS:=.html}
 
 all: FRC ${BINS} ${LIBS} ${MANS}
@@ -72,7 +75,7 @@ html: FRC ${HTMLS}
 	    -e "s|@@libdir@@|\$${PRAXIS_LIBDIR:-${libdir}}|g" \
 	    -e "s|@@mandir@@|${mandir}|g" \
 	    -e "s|@@man1dir@@|${man1dir}|g" \
-	    -e "s|@@man3dir@@|${man3dir}|g" \
+	    -e "s|@@man5dir@@|${man5dir}|g" \
 	    -e "s|@@man7dir@@|${man7dir}|g" \
 	    -e "s|@@localstatedir@@|${localstatedir}|g" \
 	    -e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-${builddir}\}|g" \
@@ -90,7 +93,7 @@ html: FRC ${HTMLS}
 	    -e "s|@@libdir@@|\$${PRAXIS_LIBDIR:-${libdir}}|g" \
 	    -e "s|@@mandir@@|${mandir}|g" \
 	    -e "s|@@man1dir@@|${man1dir}|g" \
-	    -e "s|@@man3dir@@|${man3dir}|g" \
+	    -e "s|@@man5dir@@|${man5dir}|g" \
 	    -e "s|@@man7dir@@|${man7dir}|g" \
 	    -e "s|@@localstatedir@@|${localstatedir}|g" \
 	    -e "s|@@builddir@@|$$\{PRAXIS_BUILDDIR:-${builddir}\}|g" \
@@ -116,7 +119,7 @@ install: FRC all
 	    ${DESTDIR}${libdir} \
 	    ${DESTDIR}${libdir}/public \
 	    ${DESTDIR}${man1dir} \
-	    ${DESTDIR}${man3dir} \
+	    ${DESTDIR}${man5dir} \
 	    ${DESTDIR}${man7dir} \
 	    ${DESTDIR}${builddir} \
 	    ${DESTDIR}${cachedir} \
@@ -128,7 +131,7 @@ install: FRC all
 	for lib in ${LIBS}; do install -m0644 $${lib} ${DESTDIR}${libdir}; done
 	for public in ${PUBLICS}; do install -m0644 $${public} ${DESTDIR}${libdir}/public
 	for man1 in ${MAN1}; do install -m0644 $${man1} ${DESTDIR}${man1dir}; done
-	for man3 in ${MAN3}; do install -m0644 $${man3} ${DESTDIR}${man3dir}; done
+	for man5 in ${MAN5}; do install -m0644 $${man5} ${DESTDIR}${man5dir}; done
 	for man7 in ${MAN7}; do install -m0644 $${man7} ${DESTDIR}${man7dir}; done
 
 clean: FRC
