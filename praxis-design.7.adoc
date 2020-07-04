@@ -66,10 +66,10 @@ pass
 
 Named as such to conform with the rest of the Mutiny naming scheme. "Praxis," the word, means in the
 original Greek, "action." Packages are referred to as theories, thus praxis carries out a
-theory(7). `praxis` is the reference implementation of the package manager used by mutiny(7).
+theory(3). `praxis` is the reference implementation of the package manager used by mutiny(7).
 
 == See also
 
-<<theory.7.adoc#,theory(7)>>
+<<theory.3.adoc#,theory(3)>>
 
 include::footer.adoc[]
