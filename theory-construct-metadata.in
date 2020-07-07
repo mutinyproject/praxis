@@ -25,7 +25,7 @@ while [ "$#" -gt 0 ]; do
     is_theory_dir "${1}" || die 2 "'${1}' is not a directory containing a package or library"
     resolved_dir=$(readlink -f "${1}")
 
-    if is_package_dir "${resolved_dir}"; then
+    if is_pkg_dir "${resolved_dir}"; then
         THEORY=$(basename "${resolved_dir}")
         PN="${THEORY##*/}"
         PV="${PN#*#}"
