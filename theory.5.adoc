@@ -310,7 +310,7 @@ actions::
     The actual executable code used to build a package.
 
 theory::
-    . The package API. See theory(5).
+    . The package API. You are reading the documentation for it right now.
 
     . A directory containing the data used to build a package. A directory contains a package if it
       has either an action, or a library (which creates actions).
