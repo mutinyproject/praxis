@@ -6,7 +6,7 @@
 myusage() { usage "theory-construct-metadata [-r] THEORY..."; }
 
 recurse=false
-while getopts :a:o:r arg >/dev/null 2>&1; do
+while getopts :r arg >/dev/null 2>&1; do
     case "${arg}" in
         r)
             recurse=true
