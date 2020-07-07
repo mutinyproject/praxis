@@ -22,7 +22,7 @@ shift $(( OPTIND - 1 ))
 [ "$#" -gt 0 ] || myusage
 
 while [ "$#" -gt 0 ]; do
-    is_theory_dir "${1}" || die 2 "'${1}' is not a directory containing an action or library"
+    is_theory_dir "${1}" || die 2 "'${1}' is not a directory containing a package or library"
 
     if "${recurse}" && [ -r "${1}"/libraries ]; then
         # TODO(somasis): arguments are not used for anything yet.
