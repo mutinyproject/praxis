@@ -7,8 +7,8 @@ theory - package API used by Mutiny
 == Synopsis
 
 This document aims to explain the API available for writing packages for Mutiny. This should be
-considered the definitive document to consult when writing packages, or when developing package
-managers.
+considered the definitive document to consult when writing packages, libraries, package managers,
+or anything that consumes the data.
 
 == Repositories
 
