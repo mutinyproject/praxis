@@ -276,4 +276,17 @@ The directories in which a build is executed are undefined. However, it is a goo
 something located in a good location for temporary work. A directory in `/var/tmp` is a good idea;
 `/tmp`, not so much, as build directories *should* be allowed to persist for long periods of time.
 
+[glossary]
+== Glossary
+
+[glossary]
+actions::
+    The actual executable code used to build a package.
+
+theory::
+    . The package API. See theory(5).
+
+    . A directory containing the data used to build a package. A directory contains a package if it
+      has either an action, or a library (which creates actions).
+
 include::footer.adoc[]

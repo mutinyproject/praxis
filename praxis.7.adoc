@@ -118,19 +118,6 @@ mpd
 passage
 ----
 
-[glossary]
-== Glossary
-
-[glossary]
-actions::
-    The actual executable code used to build a package.
-
-theory::
-    . The package API. See theory(5).
-
-    . A directory containing the data used to build a package. A directory contains a package if it
-      has either an action, or a library (which creates actions).
-
 == Etymology
 
 Named as such to conform with the rest of the Mutiny naming scheme. "Praxis," the word, means in the
