@@ -3,7 +3,7 @@
 . idioms
 . "@@libdir@@"/theory.sh
 
-myusage() { usage "theory-metadata [-r] THEORY..."; }
+myusage() { usage "theory-construct-metadata [-r] THEORY..."; }
 
 recurse=false
 while getopts :a:o:r arg >/dev/null 2>&1; do
@@ -43,7 +43,7 @@ while [ "$#" -gt 0 ]; do
         # TODO(somasis): arguments are not used for anything yet.
         # shellcheck disable=SC2034
         backslash "${1}"/libraries | while read -r library arguments; do
-            theory-metadata -r "@@dbdir@@/libraries/${library}"
+            theory-construct-metadata -r "@@dbdir@@/libraries/${library}"
         done
     fi
 

@@ -1,0 +1,11 @@
+= theory-construct-action(1)
+
+== Name
+
+theory-construct-action - resolve dependencies of a theory and print all action parts
+
+== Description
+
+TODO
+
+include::footer.adoc[]

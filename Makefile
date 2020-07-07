@@ -34,8 +34,8 @@ BINS = \
     repo-lint \
     repo-list \
     repo-update \
-    theory-action \
-    theory-metadata
+    theory-construct-action \
+    theory-construct-metadata
 
 LIBS = \
     theory.sh

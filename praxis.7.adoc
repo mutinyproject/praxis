@@ -49,10 +49,11 @@ require a shell parser for anything other than running the actual actions that b
     ** [ ] `repo-lint` - lint repositories and check their validity according to theory(5).
         *** [ ] Tests
 
-* [ ] Build theory construction utilities
-    ** [x] `theory-action` - resolve and print all action (build script) parts of a theory.
+* [ ] Build theory utilities
+    ** [x] `theory-construct-action` - resolve and print all action (build script) parts of a
+       theory.
         *** [ ] Tests
-    ** [x] `theory-metadata` - resolve and print all metadata parts of a theory.
+    ** [x] `theory-construct-metadata` - resolve and print all metadata parts of a theory.
         *** [ ] Tests
     ** Open questions:
         . Should packages be created by concatenation of things, which creates a mostly

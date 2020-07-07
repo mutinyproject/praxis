@@ -3,7 +3,7 @@
 . idioms
 . "@@libdir@@"/theory.sh
 
-myusage() { usage "theory-action [-r] THEORY..."; }
+myusage() { usage "theory-construct-action [-r] THEORY..."; }
 
 recurse=false
 while getopts :r arg >/dev/null 2>&1; do
@@ -30,7 +30,7 @@ while [ "$#" -gt 0 ]; do
         # TODO(somasis): arguments are not used for anything yet.
         # shellcheck disable=SC2034
         backslash "${1}"/libraries | while read -r library arguments; do
-            theory-action -r "@@dbdir@@/libraries/${library}"
+            theory-construct-action -r "@@dbdir@@/libraries/${library}"
         done
     fi
 

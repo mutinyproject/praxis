@@ -1,0 +1,11 @@
+= theory-construct-metadata(1)
+
+== Name
+
+theory-construct-metadata - print all metadata of a theory
+
+== Description
+
+TODO
+
+include::footer.adoc[]
