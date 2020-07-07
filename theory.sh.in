@@ -14,9 +14,9 @@ is_theory_dir() {
 is_repo_dir() {
     [ -d "${1}" ] || die 2 "'${1}' is not a directory"
 
-    [ -d "${1}"/packages ] && [ -d "${1}"/metadata ] &&
-        [ -d "${1}"/libraries ] && [ -d "${1}"/metadata ] &&
-        return 0
+    [ -d "${1}"/packages ] && [ -d "${1}"/metadata ] \
+        && [ -d "${1}"/libraries ] && [ -d "${1}"/metadata ] \
+        && return 0
 
     return 1
 }
