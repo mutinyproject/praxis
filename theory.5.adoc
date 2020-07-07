@@ -13,28 +13,26 @@ or anything that consumes the data.
 == Repositories
 
 Package managers *must* support multiple repositories. The internal prioritization of these
-repositories is dictated by the <<priority>>. User-facing sort (ex. when listing repositories
-installed on the system) is not defined.
+repositories is dictated by the <<priority,priority>>. User-facing sort (ex. when listing
+repositories installed on the system) is not defined, but praxis(7) sorts them alphabetically.
 
 Repository names are alphanumeric plus `_` and `-`.
 
-The file and directory layout of a valid repository is as follows, _italicized_ items representing
+The file and directory layout of a repository is as follows, _italicized_ items representing
 optional items, anything else required:
 
-* <repository name>/
-    ** metadata/
-        *** _dependencies_
-        *** _summary_
-        *** priority
+* `<repository>`/
+    ** _dependencies_
+    ** <<repo-metadata,metadata>>/
+        *** <<repo-priority,priority>>
+        *** _<<repo-summary,summary>>_
     ** _libraries_/
-        *** library1
+        *** <<library-actions,action>>
     ** packages/
-        *** openssh#1.2.3/ - This directory's path is exported as `${PKGDIR}`.
+        *** openssh#1.2.3/
+            **** <<actions,action>>
             **** _dependencies_
-            **** _libraries_ - Libraries to be used for constructing the package's theory.
-            **** _sha256sum_
-            **** _sources_
-            **** theory0
+            **** _libraries_ - Libraries to be combined together to create the package.
             **** _metadata/_ - All files under this directory are exported as environment variables
                                after importing all libraries.
                 ***** _HOMEPAGE_
