@@ -1,27 +1,5 @@
 #!/bin/sh
 
-estderr() {
-    # shellcheck disable=SC2059
-    printf "$@" >&2
-}
-
-edie() {
-    [ "$#" -gt 0 ] && estderr "$@"
-    exit 1
-}
-
-eerror() {
-    edie "${color_bold}${color_red}!!${color_reset} %s\n" "$@"
-}
-
-ewarning() {
-    estderr "${color_bold}${color_yellow}!?${color_reset} %s\n" "$@"
-}
-
-einfo() {
-    printf "${color_bold}${color_green}..${color_reset} %s\n" "$@"
-}
-
 default_pkg_init() { :; }
 
 default_src_fetch() {
@@ -30,8 +8,8 @@ default_src_fetch() {
     while [ $# -gt 0 ]; do
         local output="${FETCHDIR}"/"$(basename "$1")"
         if ! [ -f "${output}" ]; then
-            edo curl -# -L -C - -o "${output}".part "$1"
-            edo mv "${output}".part "${output}"
+            call curl -# -L -C - -o "${output}".part "$1"
+            call mv "${output}".part "${output}"
         fi
 
         shift
@@ -50,8 +28,8 @@ pkg_init() { default_pkg_init "$@"; }
 src_fetch() { default_src_fetch "$@"; }
 src_unpack() { default_src_unpack "$@"; }
 src_prepare() { default_src_prepare "$@"; }
-src_configure() { eerror -d "phase 'src_configure' is not defined!\n"; }
-src_test() { eerror -d "phase 'src_test' is not defined!\n"; }
-src_install() { eerror -d "phase 'src_install' is not defined!\n"; }
+src_configure() { die 100 "phase 'src_configure' is not defined!"; }
+src_test() { die 100 "phase 'src_test' is not defined!"; }
+src_install() { die 100 "phase 'src_install' is not defined!"; }
 pkg_premerge() { default_pkg_premerge "$@"; }
 pkg_postmerge() { default_pkg_postmerge "$@"; }

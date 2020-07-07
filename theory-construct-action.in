@@ -19,7 +19,7 @@ while getopts :r arg >/dev/null 2>&1; do
 done
 shift $(( OPTIND - 1 ))
 
-[ "$#" -eq 0 ] && myusage
+[ "$#" -gt 0 ] || myusage
 
 while [ "$#" -gt 0 ]; do
     if ! is_theory_dir "${1}"; then
