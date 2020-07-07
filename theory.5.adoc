@@ -42,35 +42,19 @@ optional items, anything else required:
                 ***** _patches/_
                     ****** _openssh-1.2.3-backport.patch_
 
-=== Repository metadata
+[#repo-metadata]
+=== Metadata
 
 Repositories *must* have a directory in their root named `metadata`.
 
-==== Dependencies (optional)
-
-Repositories *may* contain a file in `metadata`, named `dependencies`. The `dependencies` file *must*
-contain a single repository on each line. Repositories listed in this file are repositories which the
-package manager *must* have installed prior to the installation of the repository depending on them.
-The order in which they are listed is unspecified.
-
-Any repository listed will have its `libraries` directory searched when parsing package files; the order
-in which they are searched is determined by the `priority` value of the repository.
-
-Do not add repositories to `dependencies` simply because a package in your repository depends on something
-in another repository. The package manager *shall* deal with determining what repository needs to be
-installed to satisfy a dependency through usage of the link:#universe[`universe` meta-repository].
-
-==== Summary
-
-Repositories *should* have a summary. The summary should be a short, one-line blurb describing the
-repository's contents or objective.
-
+[#repo-priority]
 ==== Priority
 
 Repositories *must* have a file within `metadata` named `priority`.
 The `priority` file *must* contain a non-negative integer.
 
-The intended scheme goes like so:
+There _are_ meanings that go with each number, and they go like so:
+
 [start=0]
 . First-party primary repository, over which nothing has a greater priority
    There should only be one repository with this level. (ex. Base packages for a system.)
@@ -78,6 +62,31 @@ The intended scheme goes like so:
    (ex. Repositories containing software categories or projects; GNOME, KDE...)
 . First-party tertiary repository. (ex. A distribution developer's repository.)
 . Third-party repository. (ex. A distribution user's repository.)
+
+[#repo-summary]
+==== Summary
+
+Repositories *should* have a summary. The contents should be a short, one-line blurb, describing
+the repository's contents, objective, or theme.
+
+For example, in listings, a package manager could show the summary next to the repository's name.
+
+[#repo-dependencies]
+==== Dependencies (optional)
+
+Repositories can optionally have a file in `metadata`, named `dependencies`.
+
+The file should be a list of the names of repositories on each line. Repositories listed in this
+file are dependent repositories, with which the package manager *must* have installed prior to the
+installation of the repository declaring these dependencies. The order in which they are listed in
+the file is unimportant.
+
+Any repository listed will have its `libraries` directory searched when parsing package files; the order
+in which they are searched is determined by the `priority` value of the repository.
+
+Do not add repositories to `dependencies` simply because a package in your repository depends on something
+in another repository. The package manager should deal with determining what repository needs to be
+installed to satisfy a dependency through usage of the <<repo-meta,`universe` meta-repository>>.
 
 === Packages
 
