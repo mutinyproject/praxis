@@ -1,5 +1,7 @@
 = praxis(7)
 
+:url-skarnet: https://skarnet.org/software
+
 == Name
 
 praxis - package manager for Mutiny's package API, theory
@@ -17,7 +19,7 @@ of useful functionality for developers, metadata consumers, and users.
 
 No code evaluation is used at any point. All code is generated purely by following hierarchies of
 inheritance for actions (build scripts) and metadata.
-Concepts like https://skarnet.org/software/s6/s6-envdir.html[envdirs] are used to additionally ease
+Concepts like {url-skarnet}/s6/s6-envdir.html[envdirs] are used to additionally ease
 the amount of parsing that must be done to files in order to construct metadata for packages,
 repositories, and libraries.
 
@@ -31,7 +33,7 @@ require a shell parser for anything other than running the actual actions that b
 
 * https://git.mutiny.red/mutiny/idioms[`idioms`]
 * A POSIX-compliant shell
-* https://skarnet.org/software/s6-portable-utils[`s6-portable-utils`]
+* {url-skarnet}/s6-portable-utils[`s6-portable-utils`]
     ** `s6-update-symlinks` is used for updating repositories while respecting priority.
 
 == Roadmap
