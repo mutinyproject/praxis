@@ -2,12 +2,12 @@
 .\"     Title: praxis
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-07-04
+.\"      Date: 2020-07-07
 .\"    Manual: Mutineer's Guide - praxis
 .\"    Source: Mutiny
 .\"  Language: English
 .\"
-.TH "PRAXIS" "7" "2020-07-04" "Mutiny" "Mutineer\(aqs Guide \- praxis"
+.TH "PRAXIS" "7" "2020-07-07" "Mutiny" "Mutineer\(aqs Guide \- praxis"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -39,8 +39,9 @@ thing, so as to ease frontend development and more importantly, to make the surf
 very small. With this design in mind, \fBpraxis\fP can be fast and very compact, while providing a lot
 of useful functionality for developers, metadata consumers, and users.
 .sp
-No code evaluation is used at any point. All code is generated purely by following hierarchies of
-inheritance for actions (build scripts) and metadata.
+No code evaluation is used, up until the actual building of packages.
+All code is generated purely by following hierarchies of inheritance for actions and metadata.
+.sp
 Concepts like \c
 .URL "https://skarnet.org/software/s6/s6\-envdir.html" "envdirs" " "
 are used to additionally ease
@@ -62,7 +63,10 @@ require a shell parser for anything other than running the actual actions that b
 .  sp -1
 .  IP \(bu 2.3
 .\}
-.URL "https://git.mutiny.red/mutiny/idioms" "\f(CRidioms\fP" ""
+A POSIX\-compliant shell: on Mutiny this is \c
+.URL "https://github.com/ibara/oksh" "oksh(1)" ","
+but it is
+written with intent that anything vaguely POSIX compliant should function properly.
 .RE
 .sp
 .RS 4
@@ -73,7 +77,18 @@ require a shell parser for anything other than running the actual actions that b
 .  sp -1
 .  IP \(bu 2.3
 .\}
-A POSIX\-compliant shell
+.URL "https://git.mutiny.red/mutiny/idioms" "\f(CRidioms\fP" ""
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Used in lieu of implementing a bunch of small flow functions into the package API.
+.RE
 .RE
 .sp
 .RS 4
@@ -184,7 +199,7 @@ Tests
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Build theory construction utilities
+Build theory utilities
 .sp
 .RS 4
 .ie n \{\
@@ -194,7 +209,7 @@ Build theory construction utilities
 .  sp -1
 .  IP \(bu 2.3
 .\}
-\f(CRtheory\-action\fP \- resolve and print all action (build script) parts of a theory.
+\f(CRtheory\-resolve\-action\fP \- resolve and print all action (build script) parts of a theory.
 .sp
 .RS 4
 .ie n \{\
@@ -216,7 +231,7 @@ Tests
 .  sp -1
 .  IP \(bu 2.3
 .\}
-\f(CRtheory\-metadata\fP \- resolve and print all metadata parts of a theory.
+\f(CRtheory\-resolve\-metadata\fP \- resolve and print all metadata parts of a theory.
 .sp
 .RS 4
 .ie n \{\
@@ -298,6 +313,28 @@ Tests
 See the first open question above to understand my anxieties with this format.
 .RE
 .RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRpkg\-build\fP \- run each phase of a package script
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Tests
+.RE
+.RE
 .RE
 .SH "WISHLIST"
 .sp
@@ -340,7 +377,7 @@ Priority levels
 .  sp -1
 .  IP \(bu 2.3
 .\}
-\f(CR::mutiny\fP is the most important repository.
+\f(CR::primary\fP is the most important repository.
 .RE
 .sp
 .RS 4
@@ -434,39 +471,6 @@ mpd
 passage
 .fi
 .if n .RE
-.SH "GLOSSARY"
-.sp
-actions
-.RS 4
-The actual executable code used to build a package.
-.RE
-.sp
-theory
-.RS 4
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 1.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 1." 4.2
-.\}
-The package API. See theory(5).
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 2.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 2." 4.2
-.\}
-A directory containing the data used to build a package. A directory contains a package if it
-has either an action, or a library (which creates actions).
-.RE
-.RE
 .SH "ETYMOLOGY"
 .sp
 Named as such to conform with the rest of the Mutiny naming scheme. "Praxis," the word, means in the

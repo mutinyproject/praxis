@@ -17,12 +17,14 @@ PHILOSOPHY
        providing a lot of useful functionality for developers, metadata
        consumers, and users.
 
-       No code evaluation is used at any point. All code is generated purely
-       by following hierarchies of inheritance for actions (build scripts) and
-       metadata.  Concepts like envdirs
-       <https://skarnet.org/software/s6/s6-envdir.html> are used to
-       additionally ease the amount of parsing that must be done to files in
-       order to construct metadata for packages, repositories, and libraries.
+       No code evaluation is used, up until the actual building of packages.
+       All code is generated purely by following hierarchies of inheritance
+       for actions and metadata.
+
+       Concepts like envdirs <https://skarnet.org/software/s6/s6-envdir.html>
+       are used to additionally ease the amount of parsing that must be done
+       to files in order to construct metadata for packages, repositories, and
+       libraries.
 
        Furthermore, another goal is ensuring that it should be possible to get
        metadata from packages without having to call out to a shell running
@@ -33,9 +35,14 @@ PHILOSOPHY
        other than running the actual actions that build a package.
 
 DEPENDENCIES
+       •   A POSIX-compliant shell: on Mutiny this is oksh(1)
+           <https://github.com/ibara/oksh>, but it is written with intent that
+           anything vaguely POSIX compliant should function properly.
+
        •   idioms <https://git.mutiny.red/mutiny/idioms>
 
-       •   A POSIX-compliant shell
+           •   Used in lieu of implementing a bunch of small flow functions
+               into the package API.
 
        •   s6-portable-utils <https://skarnet.org/software/s6-portable-utils>
 
@@ -60,15 +67,15 @@ ROADMAP
 
                •   Tests
 
-       •   Build theory construction utilities
+       •   Build theory utilities
 
-           •   theory-action - resolve and print all action (build script)
-               parts of a theory.
+           •   theory-resolve-action - resolve and print all action (build
+               script) parts of a theory.
 
                •   Tests
 
-           •   theory-metadata - resolve and print all metadata parts of a
-               theory.
+           •   theory-resolve-metadata - resolve and print all metadata parts
+               of a theory.
 
                •   Tests
 
@@ -90,6 +97,10 @@ ROADMAP
                •   See the first open question above to understand my
                    anxieties with this format.
 
+           •   pkg-build - run each phase of a package script
+
+               •   Tests
+
 WISHLIST
        •   Multiple repositories
 
@@ -97,7 +108,7 @@ WISHLIST
 
            •   Priority levels
 
-               •   ::mutiny is the most important repository.
+               •   ::primary is the most important repository.
 
                •   Other repositories should always be able to depend on
                    libraries in repositories that are have a higher priority.
@@ -139,18 +150,6 @@ WISHLIST
            mpd
            passage
 
-GLOSSARY
-       actions
-           The actual executable code used to build a package.
-
-       theory
-
-            1. The package API. See theory(5).
-
-            2. A directory containing the data used to build a package. A
-               directory contains a package if it has either an action, or a
-               library (which creates actions).
-
 ETYMOLOGY
        Named as such to conform with the rest of the Mutiny naming scheme.
        "Praxis," the word, means in the original Greek, "action." Packages are
@@ -179,4 +178,4 @@ LICENSE
 
 
 
-Mutiny                            2020-07-04                         PRAXIS(7)
+Mutiny                            2020-07-07                         PRAXIS(7)
