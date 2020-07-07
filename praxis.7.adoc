@@ -17,8 +17,9 @@ thing, so as to ease frontend development and more importantly, to make the surf
 very small. With this design in mind, *praxis* can be fast and very compact, while providing a lot
 of useful functionality for developers, metadata consumers, and users.
 
-No code evaluation is used at any point. All code is generated purely by following hierarchies of
-inheritance for actions (build scripts) and metadata.
+No code evaluation is used, up until the actual building of packages.
+All code is generated purely by following hierarchies of inheritance for actions and metadata.
+
 Concepts like {url-skarnet}/s6/s6-envdir.html[envdirs] are used to additionally ease
 the amount of parsing that must be done to files in order to construct metadata for packages,
 repositories, and libraries.
