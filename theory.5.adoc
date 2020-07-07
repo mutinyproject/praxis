@@ -88,17 +88,38 @@ Do not add repositories to `dependencies` simply because a package in your repos
 in another repository. The package manager should deal with determining what repository needs to be
 installed to satisfy a dependency through usage of the <<repo-meta,`universe` meta-repository>>.
 
+[#repo-packages]
 === Packages
 
-Repositories *should* contain a directory named `packages`; if they do not, package managers *may*
+Repositories should contain a directory named `packages`; if they do not, package managers can
 ignore them entirely, as there's not much use to a repository with no package.
 
-==== Package specifications
+See the <<pkg,packages>> section for details about what goes on within.
+
+[#pkg]
+== Packages
+
+This term can be a bit overloaded. It's just too useful of a term.
+When I say package, I mean "a collection containing instructions to build a piece of software".
+
+In theory(5), a package means a directory containing an action, libraries, or both. If it's just a
+directory with metadata, it is not a package, because there's no actual build script. And, in fact,
+if you depend on libraries that also don't provide any action file, your directory is not a package.
+
+Why so lenient? Because a package can add actions on top of the actions declared in the libraries it
+uses, and same with metadata. It is a hierarchy of inheritance. It all gets combined to create a
+self-sufficient script, which is what's actually used when building.
+
+Unlike other, simpler formats which provide simpler build scripts, this allows for reducing code
+duplication in a tree of packages.
+
+[#pkg-specifications]
+=== Specifications
 
 Package specifications (informally referred to as "specs") are strings which describe a package.
 
-Specifications take on multiple permutations, because they are made up of four different parts, of
-which only the name is required.
+Specifications take on multiple permutations, because they are made up of four different parts,
+<<pkg-disambiguation,of which only the name is required>>.
 
 Given the fully-qualified spec `package#1.0::repository`...
 
@@ -119,15 +140,15 @@ characters. (for `r1`, etc.)
 
 All parts of a package spec are case-sensitive.
 
-===== Disambiguation
+[#pkg-disambiguation]
+==== Disambiguation
 
-The only strictly *required* part of a spec is the inclusion of the
-package name. If any other part other than the name is omitted, it will
-be disambiguated in order to determine what packages can satisfy the
-specification given.
+When used as user input, the only strictly *required* part of a spec is the inclusion of the package
+name. If any other part other than the name is omitted, it will be disambiguated in order to
+determine what packages can satisfy it.
 
-If more than one package matches a specification, the package manager
-*may* prompt the user in some fashion to be more specific.
+If more than one package matches a specification, the package manager *should* prompt the user in
+some fashion to be more specific.
 
 === Format
 
