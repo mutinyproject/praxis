@@ -32,8 +32,10 @@ require a shell parser for anything other than running the actual actions that b
 
 == Dependencies
 
+* A POSIX-compliant shell: on Mutiny this is https://github.com/ibara/oksh[oksh(1)], but it is
+  written with intent that anything vaguely POSIX compliant should function properly.
 * https://git.mutiny.red/mutiny/idioms[`idioms`]
-* A POSIX-compliant shell
+    ** Used in lieu of implementing a bunch of small flow functions into the package API.
 * {url-skarnet}/s6-portable-utils[`s6-portable-utils`]
     ** `s6-update-symlinks` is used for updating repositories while respecting priority.
 
