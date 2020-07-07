@@ -65,7 +65,7 @@ require a shell parser for anything other than running the actual actions that b
 * Multiple repositories
     ** Intra-repository dependencies
     ** Priority levels
-        *** `::mutiny` is the most important repository.
+        *** `::primary` is the most important repository.
         *** Other repositories should always be able to depend on libraries in repositories that
             are have a higher priority.
 
