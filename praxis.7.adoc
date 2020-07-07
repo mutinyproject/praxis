@@ -56,7 +56,7 @@ require a shell parser for anything other than running the actual actions that b
           basically dictates the rest of the format.
 
 * [ ] Build package building utilities
-    ** [ ] `pkg-gen` - create a self-contained package script.
+    ** [x] `pkg-gen` - create a self-contained package script.
         *** [ ] Tests
         *** See the first open question above to understand my anxieties with this format.
 
