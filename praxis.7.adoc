@@ -65,6 +65,8 @@ require a shell parser for anything other than running the actual actions that b
     ** [x] `pkg-gen` - create a self-contained package script.
         *** [ ] Tests
         *** See the first open question above to understand my anxieties with this format.
+    ** [ ] `pkg-build` - run each phase of a package script
+        *** [ ] Tests
 
 == Wishlist
 
