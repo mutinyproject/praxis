@@ -150,20 +150,14 @@ determine what packages can satisfy it.
 If more than one package matches a specification, the package manager *should* prompt the user in
 some fashion to be more specific.
 
-=== Format
+[#pkg-action]
+=== Action
 
-`theory0` files and `lib0` files are effectively just shell scripts. Package managers *should*
-avoid locking the user into any particular Bourne-style shell implementation; as such, the format
-of these files should adhere to shell syntax as defined in
-http://pubs.opengroup.org/onlinepubs/9699919799/[POSIX 2016].
+:url-posix2016: http://pubs.opengroup.org/onlinepubs/9699919799/
 
-That said, a few exceptions are made for functionality that is deemed too
-useful to be given up, and isn't yet specified in POSIX...
+`action` files are really just shell scripts. These files should adhere to shell syntax as defined
+in {url-posix2016}[POSIX 2016].
 
-* Declaring arrays (`array=( "foo" "bar" "baz" )`)
-* Iterating through arrays (`for item in "${array[@]}";do ... done`)
-* Appending to arrays (`array+=( "xyzzy" )`)
-* Local-scope variables (`local var="value"`)
 
 == Build environment
 
