@@ -284,7 +284,7 @@ By default it is not defined.
 *Only ran during installation.*
 
 This phase's purpose is to run the installation for the package; so, commands like
-`make install DESTDIR="${IMAGE}"`.
+`make install DESTDIR="${DESTDIR}"`.
 
 Under no circumstances should anything in this phase touch something outside the build environment.
 The package manager will merge files from the package to the system, and the build process *may* not
@@ -297,7 +297,7 @@ By default it is not defined.
 *Only ran during installation.*
 
 This phase's purpose is to run any commands that are required to be ran on the system itself before
-the package is merged.
+the package is merged into the filesystem.
 
 By default it does nothing.
 
@@ -306,7 +306,7 @@ By default it does nothing.
 *Only ran during installation.*
 
 This phase's purpose is to run any commands that are required to be ran on the system itself after
-the package is merged.
+the package is merged into the filesystem.
 
 (ex. Updating icon caches, displaying important information after a major package upgrade, ...)
 
