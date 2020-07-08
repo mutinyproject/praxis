@@ -2,12 +2,12 @@
 .\"     Title: theory
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-07-07
+.\"      Date: 2020-07-08
 .\"    Manual: Mutineer's Guide - praxis
 .\"    Source: Mutiny
 .\"  Language: English
 .\"
-.TH "THEORY" "5" "2020-07-07" "Mutiny" "Mutineer\(aqs Guide \- praxis"
+.TH "THEORY" "5" "2020-07-08" "Mutiny" "Mutineer\(aqs Guide \- praxis"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -349,13 +349,13 @@ Why so lenient? Because a package can add actions on top of the actions declared
 uses, and same with metadata. It is a hierarchy of inheritance. It all gets combined to create a
 self\-sufficient script, which is what\(cqs actually used when building.
 .sp
-Unlike other, simpler formats which provide simpler build scripts, this allows for reducing code
-duplication in a tree of packages.
-.SS "Specifications"
+Unlike other, simpler package formats which provide simpler build scripts, using libraries allows
+for reducing code duplication in a tree of packages, and thus quicker mass changes.
+.SS "Specification"
 .sp
-Package specifications (informally referred to as "specs") are strings which describe a package.
+Package specifications (informally referred to as "specs") are strings which \fIspecify\fP a package.
 .sp
-Specifications take on multiple permutations, because they are made up of four different parts,
+Specifications take on multiple permutations, because they are made up of three different parts,
 of which only the name is required.
 .sp
 Given the fully\-qualified spec \f(CRpackage#1.0::repository\fP...
@@ -368,7 +368,7 @@ Given the fully\-qualified spec \f(CRpackage#1.0::repository\fP...
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Package name (\f(CRpackage\fP)
+The package name is \f(CRpackage\fP
 .RE
 .sp
 .RS 4
@@ -379,7 +379,7 @@ Package name (\f(CRpackage\fP)
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Package version (\f(CR1.0\fP)
+The package version is \f(CR1.0\fP
 .RE
 .sp
 .RS 4
@@ -390,11 +390,16 @@ Package version (\f(CR1.0\fP)
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Package repository (\f(CRrepository\fP)
+The package repository is \f(CRrepository\fP
 .RE
 .sp
-For a package spec to be valid, it \fBmust\fP match the regex
-\f(CR((^[A\-Za\-z](?:[A\-Za\-z0\-9_+\-]*)?)(#[a\-z0\-9\(rs._\-]+)?(::[A\-Za\-z0\-9_\-]+)?|\(rs*)\fP.
+For a package specification to be valid, it \fBmust\fP match this regular expression:
+.sp
+.if n .RS 4
+.nf
+(^[A\-Za\-z](?:[A\-Za\-z0\-9_+\-]*)?)(#[a\-z0\-9\(rs._\-]+)?(::[A\-Za\-z0\-9_\-]+)?
+.fi
+.if n .RE
 .sp
 Breaking it down:
 .sp
@@ -406,7 +411,7 @@ Breaking it down:
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Package name is alphanumeric, plus \f(CR_\fP, \f(CR+\fP, and \f(CR\-\fP. It must start with an alphanumeric.
+Group 1, the package name, is alphanumeric, plus \f(CR_\fP, \f(CR+\fP, and \f(CR\-\fP. It can\(cqt start with a number.
 .RE
 .sp
 .RS 4
@@ -417,8 +422,8 @@ Package name is alphanumeric, plus \f(CR_\fP, \f(CR+\fP, and \f(CR\-\fP. It must
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Package version is numeric plus \f(CR.\fP, \f(CR_\fP, \f(CR\-\fP, and lowercase alpha
-characters. (for \f(CRr1\fP, etc.)
+Group 2, the package version, is numeric plus \f(CR.\fP, \f(CR_\fP, \f(CR\-\fP, and lowercase alpha characters.
+(for \f(CRr1\fP, etc.)
 .RE
 .sp
 .RS 4
@@ -429,33 +434,54 @@ characters. (for \f(CRr1\fP, etc.)
 .  sp -1
 .  IP \(bu 2.3
 .\}
-Repository is alphanumeric plus \f(CR_\fP, and \f(CR\-\fP. It must start with an alphanumeric.
+Group 3, the repository, is alphanumeric plus \f(CR_\fP, and \f(CR\-\fP. It must start with an alphanumeric.
 .RE
 .sp
-All parts of a package spec are case\-sensitive.
+All parts of a package specification are case\-sensitive.
 .SS "Disambiguation"
 .sp
-When used as user input, the only strictly \fBrequired\fP part of a spec is the inclusion of the package
+When used as \fIuser input\fP, the only strictly required part of a spec is the inclusion of the package
 name. If any other part other than the name is omitted, it will be disambiguated in order to
 determine what packages can satisfy it.
 .sp
-If more than one package matches a specification, the package manager \fBshould\fP prompt the user in
-some fashion to be more specific.
+If more than one package matches a specification, the package manager can either prompt the user in
+some fashion to be more specific, or just error.
 .SS "Action"
 .sp
 \f(CRaction\fP files are really just shell scripts. These files should adhere to shell syntax as defined
 in \c
 .URL "http://pubs.opengroup.org/onlinepubs/9699919799/" "POSIX 2016" "."
-.SH "BUILDING"
+The only thing that should go in them are phases.
 .sp
-This section is about the environment a package is built in.
-.sp
-When referring to a "build environment", this document is referring to the literal shell environment
-which the shell process is running in. This means it consists of things such as variables,
-functions, and the current working directory.
+.if n .RS 4
+.nf
+src_configure() {
+    call ./configure PREFIX=/ SBINDIR=/bin MANDIR=/share/man
+}
+
+src_make() {
+    call make
+}
+
+src_check() {
+    call shellspec
+}
+
+src_install() {
+    call make install DESTDIR="${DESTDIR}"
+}
+.fi
+.if n .RE
 .SS "Phases"
 .sp
-Everything in this section is \fBrequired\fP of any package manager implementation. If this isn\(cqt
+The process of package building is split up into phases. Splitting up into phases allows for easier,
+more precise debugging, and also for sandboxing of specific parts of the build process.
+.sp
+Additionally, we split things more than some other package formats do. Many formats only define
+three (build, test, install) or four phases (prepare, build, check, package), or might not even have
+phases.
+.sp
+Everything in this section is required of any package manager implementation. If this isn\(cqt
 adhered to, we\(cqll have issues with some packages building in one implementation but not another.
 .sp
 "By default" refers to a package which does not define any phases or import any libraries which
@@ -466,7 +492,8 @@ defined, regardless of if they have any function; if a phase listed here is not 
 the package manager, or the package (or a library used by the package), the package manager \fBmust\fP
 error out and fail, because that is an invalid package.
 .sp
-"Does nothing" would mean something like \f(CRpkg_init() { true; }\fP.
+"Does nothing" would mean something like \f(CRpkg_init() { true; }\fP; a no\-op.
+.sp
 "Not defined" would mean no definition of the function.
 (ex. Attempting to run function that is not defined would give an unknown command error)
 .SS "\f(CRpkg_init()\fP"
@@ -480,11 +507,7 @@ build systems that are too stubborn to cooperate with cross\-compilation.
 .sp
 \fBOnly ran during installation.\fP
 .sp
-This phase\(cqs purpose is to get any sources needed to make the package being built. By default it
-downloads any unretrieved files specified in the \c
-.URL "#Downloads" "\f(CRDOWNLOADS\fP" " "
-metadata, and then
-verifies the files match the checksums specified in the \f(CRsha256sum\fP metadata.
+This phase\(cqs purpose is to get any sources needed to make the package being built.
 .sp
 Usually you will not need to change this.
 .sp
@@ -518,9 +541,9 @@ By default it is not defined.
 .sp
 The rationale behind not providing a default definition is that it allows for more flexibility and
 less package manager dependent functionality. Rather than putting a default definition that, say,
-expects an Autotools like package, and putting that functionality in the package manager, it can be
-done with libraries.
-.SS "\f(CRsrc_compile()\fP"
+expects an Autotools\-like package (\f(CR./configure && make && make install\fP), and putting that
+functionality in the package manager, it can be done with libraries.
+.SS "\f(CRsrc_make()\fP"
 .sp
 \fBOnly ran during installation.\fP
 .sp
@@ -532,18 +555,16 @@ By default it is not defined.
 .sp
 \fBOnly ran during installation.\fP
 .sp
-This phase\(cqs purpose is to run tests for the package being built. Things
-like \f(CRmake check\fP, \f(CRctest\fP, \f(CR./setup.py test\fP, etc. are done here.
+This phase\(cqs purpose is to run tests for the package being built.
+Things like \f(CRmake check\fP, \f(CRctest\fP, \f(CR./setup.py test\fP, etc. are done here.
 .sp
-By default it is not defined. This phase is special in that the package manager \fBshould\fP make note
-of this phase not being defined. The package manager \fBshould not\fP fail when \f(CRsrc_test()\fP is
-undefined; at least, not by default. Failing may be useful for quality assurance purposes.
+By default it is not defined.
 .SS "\f(CRsrc_install()\fP"
 .sp
 \fBOnly ran during installation.\fP
 .sp
 This phase\(cqs purpose is to run the installation for the package; so, commands like
-\f(CRmake install DESTDIR="${IMAGE}"\fP.
+\f(CRmake install DESTDIR="${DESTDIR}"\fP.
 .sp
 Under no circumstances should anything in this phase touch something outside the build environment.
 The package manager will merge files from the package to the system, and the build process \fBmay\fP not
@@ -555,7 +576,7 @@ By default it is not defined.
 \fBOnly ran during installation.\fP
 .sp
 This phase\(cqs purpose is to run any commands that are required to be ran on the system itself before
-the package is merged.
+the package is merged into the filesystem.
 .sp
 By default it does nothing.
 .SS "\f(CRpkg_postmerge()\fP"
@@ -563,11 +584,35 @@ By default it does nothing.
 \fBOnly ran during installation.\fP
 .sp
 This phase\(cqs purpose is to run any commands that are required to be ran on the system itself after
-the package is merged.
+the package is merged into the filesystem.
 .sp
 (ex. Updating icon caches, displaying important information after a major package upgrade, ...)
 .sp
 By default it does nothing.
+.SH "BUILDING"
+.sp
+This section is about the environment a package is built in.
+.sp
+When referring to a "build environment", this document is referring to the literal shell environment
+which the shell process is running in. This means it consists of things such as variables,
+functions, and the current working directory.
+.SS "Idioms"
+.sp
+There\(cqs one special dependency that someone writing a package should always be able to expect to be
+installed, no matter what: \c
+.URL "https://git.mutiny.red/mutiny/idioms" "\f(CRidioms\fP" "."
+.sp
+Why is \f(CRidioms\fP used? Because it provides good, general purpose flow control functionality in
+shell scripts. praxis(7) itself uses it.
+.sp
+The main functions that you would use from it when writing a package would be
+idioms\-call(3), idioms\-error(3),
+idioms\-warn(3), idioms\-die(3), and lastly,
+idioms\-die(3).
+.sp
+If you\(cqre implementing a package manager though and wish to not have the dependency, just
+implement those commands. They\(cqre not very complex, and their existence (due to being basically
+included as part of this package API) makes their commands effectively keywords which can be.
 .SS "Directories"
 .sp
 The only requirements of the directory in which a package build is executed is that it is read\-write

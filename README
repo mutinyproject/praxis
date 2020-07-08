@@ -69,13 +69,13 @@ ROADMAP
 
        •   Build theory utilities
 
-           •   theory-resolve-action - resolve and print all action (build
+           •   theory-construct-action - resolve and print all action (build
                script) parts of a theory.
 
                •   Tests
 
-           •   theory-resolve-metadata - resolve and print all metadata parts
-               of a theory.
+           •   theory-construct-metadata - resolve and print all metadata
+               parts of a theory.
 
                •   Tests
 
@@ -178,4 +178,4 @@ LICENSE
 
 
 
-Mutiny                            2020-07-07                         PRAXIS(7)
+Mutiny                            2020-07-08                         PRAXIS(7)
