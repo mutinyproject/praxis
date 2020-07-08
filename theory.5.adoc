@@ -162,7 +162,26 @@ some fashion to be more specific, or just error.
 :url-posix2016: http://pubs.opengroup.org/onlinepubs/9699919799/
 
 `action` files are really just shell scripts. These files should adhere to shell syntax as defined
-in {url-posix2016}[POSIX 2016].
+in {url-posix2016}[POSIX 2016]. The only thing that should go in them are <<pkg-phases,phases>>.
+
+[source,sh]
+----
+src_configure() {
+    call ./configure PREFIX=/ SBINDIR=/bin MANDIR=/share/man
+}
+
+src_make() {
+    call make
+}
+
+src_check() {
+    call shellspec
+}
+
+src_install() {
+    call make install DESTDIR="${DESTDIR}"
+}
+----
 
 [#build]
 == Building
