@@ -147,12 +147,12 @@ All parts of a package specification are case-sensitive.
 [#pkg-disambiguation]
 ==== Disambiguation
 
-When used as user input, the only strictly *required* part of a spec is the inclusion of the package
+When used as _user input_, the only strictly required part of a spec is the inclusion of the package
 name. If any other part other than the name is omitted, it will be disambiguated in order to
 determine what packages can satisfy it.
 
-If more than one package matches a specification, the package manager *should* prompt the user in
-some fashion to be more specific.
+If more than one package matches a specification, the package manager can either prompt the user in
+some fashion to be more specific, or just error.
 
 [#pkg-action]
 === Action
