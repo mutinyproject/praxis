@@ -274,12 +274,10 @@ By default it is not defined.
 
 *Only ran during installation.*
 
-This phase's purpose is to run tests for the package being built. Things
-like `make check`, `ctest`, `./setup.py test`, etc. are done here.
+This phase's purpose is to run tests for the package being built.
+Things like `make check`, `ctest`, `./setup.py test`, etc. are done here.
 
-By default it is not defined. This phase is special in that the package manager *should* make note
-of this phase not being defined. The package manager *should not* fail when `src_test()` is
-undefined; at least, not by default. Failing may be useful for quality assurance purposes.
+By default it is not defined.
 
 ==== `src_install()`
 
