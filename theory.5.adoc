@@ -183,19 +183,17 @@ src_install() {
 }
 ----
 
-[#build]
-== Building
-
-This section is about the environment a package is built in.
-
-When referring to a "build environment", this document is referring to the literal shell environment
-which the shell process is running in. This means it consists of things such as variables,
-functions, and the current working directory.
-
-[#build-phases]
+[#pkg-phases]
 === Phases
 
-Everything in this section is *required* of any package manager implementation. If this isn't
+The process of package building is split up into phases. Splitting up into phases allows for easier,
+more precise debugging, and also for sandboxing of specific parts of the build process.
+
+Additionally, we split things more than some other package formats do. Many formats only define
+three (build, test, install) or four phases (prepare, build, check, package), or might not even have
+phases.
+
+Everything in this section is required of any package manager implementation. If this isn't
 adhered to, we'll have issues with some packages building in one implementation but not another.
 
 "By default" refers to a package which does not define any phases or import any libraries which
@@ -206,7 +204,8 @@ defined, regardless of if they have any function; if a phase listed here is not 
 the package manager, or the package (or a library used by the package), the package manager *must*
 error out and fail, because that is an invalid package.
 
-"Does nothing" would mean something like `pkg_init() { true; }`.
+"Does nothing" would mean something like `pkg_init() { true; }`; a no-op.
+
 "Not defined" would mean no definition of the function.
 (ex. Attempting to run function that is not defined would give an unknown command error)
 
@@ -316,6 +315,15 @@ the package is merged.
 (ex. Updating icon caches, displaying important information after a major package upgrade, ...)
 
 By default it does nothing.
+
+[#build]
+== Building
+
+This section is about the environment a package is built in.
+
+When referring to a "build environment", this document is referring to the literal shell environment
+which the shell process is running in. This means it consists of things such as variables,
+functions, and the current working directory.
 
 === Directories
 
