@@ -1,5 +1,7 @@
 = theory(5)
 
+:sectnums:
+
 == Name
 
 theory - package API used by Mutiny
