@@ -110,8 +110,8 @@ Why so lenient? Because a package can add actions on top of the actions declared
 uses, and same with metadata. It is a hierarchy of inheritance. It all gets combined to create a
 self-sufficient script, which is what's actually used when building.
 
-Unlike other, simpler formats which provide simpler build scripts, this allows for reducing code
-duplication in a tree of packages.
+Unlike other, simpler package formats which provide simpler build scripts, using libraries allows
+for reducing code duplication in a tree of packages, and thus quicker mass changes.
 
 [#pkg-specifications]
 === Specifications
