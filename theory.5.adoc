@@ -258,8 +258,8 @@ By default it is not defined.
 
 The rationale behind not providing a default definition is that it allows for more flexibility and
 less package manager dependent functionality. Rather than putting a default definition that, say,
-expects an Autotools like package, and putting that functionality in the package manager, it can be
-done with libraries.
+expects an Autotools-like package (`./configure && make && make install`), and putting that
+functionality in the package manager, it can be done with libraries.
 
 ==== `src_make()`
 
