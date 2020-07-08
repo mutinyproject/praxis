@@ -19,7 +19,8 @@ default_src_fetch() {
 default_src_unpack() { :; }
 default_src_prepare() { :; }
 # purposefully undefined: default_src_configure()
-# purposefully undefined: default_src_test()
+# purposefully undefined: default_src_make()
+# purposefully undefined: default_src_check()
 # purposefully undefined: default_src_install()
 default_pkg_premerge() { :; }
 default_pkg_postmerge() { :; }
@@ -29,7 +30,8 @@ src_fetch() { default_src_fetch "$@"; }
 src_unpack() { default_src_unpack "$@"; }
 src_prepare() { default_src_prepare "$@"; }
 src_configure() { die 100 "phase 'src_configure' is not defined!"; }
-src_test() { die 100 "phase 'src_test' is not defined!"; }
+src_make() { die 100 "phase 'src_make' is not defined!"; }
+src_check() { die 100 "phase 'src_check' is not defined!"; }
 src_install() { die 100 "phase 'src_install' is not defined!"; }
 pkg_premerge() { default_pkg_premerge "$@"; }
 pkg_postmerge() { default_pkg_postmerge "$@"; }
