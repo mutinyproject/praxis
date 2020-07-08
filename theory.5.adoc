@@ -113,32 +113,36 @@ self-sufficient script, which is what's actually used when building.
 Unlike other, simpler package formats which provide simpler build scripts, using libraries allows
 for reducing code duplication in a tree of packages, and thus quicker mass changes.
 
-[#pkg-specifications]
-=== Specifications
+[#pkg-specification]
+=== Specification
 
-Package specifications (informally referred to as "specs") are strings which describe a package.
+Package specifications (informally referred to as "specs") are strings which _specify_ a package.
 
-Specifications take on multiple permutations, because they are made up of four different parts,
+Specifications take on multiple permutations, because they are made up of three different parts,
 <<pkg-disambiguation,of which only the name is required>>.
 
 Given the fully-qualified spec `package#1.0::repository`...
 
-* Package name (`package`)
-* Package version (`1.0`)
-* Package repository (`repository`)
+* The package name is `package`
+* The package version is `1.0`
+* The package repository is `repository`
 
-// If you're reading this in the .adoc, remove the `$$ and $$` from the regex to get it unescaped.
-For a package spec to be valid, it *must* match the regex
-`$$((^[A-Za-z](?:[A-Za-z0-9_+-]*)?)(#[a-z0-9\._-]+)?(::[A-Za-z0-9_-]+)?|\*)$$`.
+For a package specification to be valid, it *must* match this regular expression:
+
+----
+(^[A-Za-z](?:[A-Za-z0-9_+-]*)?)(#[a-z0-9\._-]+)?(::[A-Za-z0-9_-]+)?
+----
 
 Breaking it down:
 
-* Package name is alphanumeric, plus `_`, `+`, and `-`. It must start with an alphanumeric.
-* Package version is numeric plus `.`, `_`, `-`, and lowercase alpha
-characters. (for `r1`, etc.)
-* Repository is alphanumeric plus `_`, and `-`. It must start with an alphanumeric.
+* Group 1, the package name, is alphanumeric, plus `_`, `+`, and `-`. It can't start with a number.
 
-All parts of a package spec are case-sensitive.
+* Group 2, the package version, is numeric plus `.`, `_`, `-`, and lowercase alpha characters.
+  (for `r1`, etc.)
+
+* Group 3, the repository, is alphanumeric plus `_`, and `-`. It must start with an alphanumeric.
+
+All parts of a package specification are case-sensitive.
 
 [#pkg-disambiguation]
 ==== Disambiguation
