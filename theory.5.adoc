@@ -221,9 +221,7 @@ build systems that are too stubborn to cooperate with cross-compilation.
 
 *Only ran during installation.*
 
-This phase's purpose is to get any sources needed to make the package being built. By default it
-downloads any unretrieved files specified in the link:#Downloads[`DOWNLOADS`] metadata, and then
-verifies the files match the checksums specified in the `sha256sum` metadata.
+This phase's purpose is to get any sources needed to make the package being built.
 
 Usually you will not need to change this.
 
