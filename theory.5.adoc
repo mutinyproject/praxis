@@ -321,6 +321,26 @@ When referring to a "build environment", this document is referring to the liter
 which the shell process is running in. This means it consists of things such as variables,
 functions, and the current working directory.
 
+[#build-idioms]
+=== Idioms
+
+:url-idioms: https://git.mutiny.red/mutiny/idioms
+
+There's one special dependency that someone writing a package should always be able to expect to be
+installed, no matter what: {url-idioms}[`idioms`].
+
+Why is `idioms` used? Because it provides good, general purpose flow control functionality in
+shell scripts. praxis(7) itself uses it.
+
+The main functions that you would use from it when writing a package would be
+<<idioms-call.3.adoc#,idioms-call(3)>>, <<idioms-error.3.adoc#,idioms-error(3)>>,
+<<idioms-warn.3.adoc#,idioms-warn(3)>>, <<idioms-die.3.adoc#,idioms-die(3)>>, and lastly,
+<<idioms-die.3.adoc#,idioms-die(3)>>.
+
+If you're implementing a package manager though and wish to not have the dependency, just
+implement those commands. They're not very complex, and their existence (due to being basically
+included as part of this package API) makes their commands effectively keywords which can be.
+
 === Directories
 
 The only requirements of the directory in which a package build is executed is that it is read-write
