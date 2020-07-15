@@ -56,10 +56,10 @@ The `priority` file *must* contain a non-negative integer.
 There _are_ meanings that go with each number, and they go like so:
 
 [start=0]
-. First-party primary repository, over which nothing has a greater priority
-   There should only be one repository with this level. (ex. Base packages for a system.)
+. First-party primary repository, over which nothing has a greater priority.
+  There should only be one repository with this level. (ex. Base packages for a system.)
 . First-party secondary repository (such as a supplementary repository).
-   (ex. Repositories containing software categories or projects; GNOME, KDE...)
+  (ex. Repositories containing software categories or projects; GNOME, KDE...)
 . First-party tertiary repository. (ex. A distribution developer's repository.)
 . Third-party repository. (ex. A distribution user's repository.)
 
