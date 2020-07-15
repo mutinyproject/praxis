@@ -129,7 +129,7 @@ install: FRC all
 
 	for bin in ${BINS}; do install -m0755 $${bin} ${DESTDIR}${bindir}; done
 	for lib in ${LIBS}; do install -m0644 $${lib} ${DESTDIR}${libdir}; done
-	for public in ${PUBLICS}; do install -m0644 $${public} ${DESTDIR}${libdir}/public
+	for public in ${PUBLICS}; do install -m0644 $${public} ${DESTDIR}${libdir}/public; done
 	for man1 in ${MAN1}; do install -m0644 $${man1} ${DESTDIR}${man1dir}; done
 	for man5 in ${MAN5}; do install -m0644 $${man5} ${DESTDIR}${man5dir}; done
 	for man7 in ${MAN7}; do install -m0644 $${man7} ${DESTDIR}${man7dir}; done
