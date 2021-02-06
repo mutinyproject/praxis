@@ -332,8 +332,7 @@ shell scripts. praxis(7) itself uses it.
 
 The main functions that you would use from it when writing a package would be
 <<idioms-call.3.adoc#,idioms-call(3)>>, <<idioms-error.3.adoc#,idioms-error(3)>>,
-<<idioms-warn.3.adoc#,idioms-warn(3)>>, <<idioms-die.3.adoc#,idioms-die(3)>>, and lastly,
-<<idioms-die.3.adoc#,idioms-die(3)>>.
+<<idioms-warn.3.adoc#,idioms-warn(3)>>, and lastly, <<idioms-die.3.adoc#,idioms-die(3)>>.
 
 If you're implementing a package manager though and wish to not have the dependency, just
 implement those commands. They're not very complex, and their existence (due to being basically
